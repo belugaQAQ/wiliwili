@@ -2,13 +2,13 @@ name: Android Build
 
 on:
   push:
-    branches: [ agent-ZNVMNG ]
+    branches: agent-ZNVMNG
     paths-ignore:
       - '**.md'
       - 'docs/**'
       - 'resources/i18n/**'
   pull_request:
-    branches: [ agent-ZNVMNG ]
+    branches: agent-ZNVMNG
   workflow_dispatch:
 
 jobs:
