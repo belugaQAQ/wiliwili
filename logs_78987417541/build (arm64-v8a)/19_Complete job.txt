@@ -1,8 +1,0 @@
-﻿2026-07-12T12:12:24.7422380Z Cleaning up orphan processes
-2026-07-12T12:12:24.7686374Z Terminate orphan process: pid (3645) (bash)
-2026-07-12T12:12:24.7706852Z Terminate orphan process: pid (4056) (buildall.sh)
-2026-07-12T12:12:24.7736296Z Terminate orphan process: pid (30215) (libplacebo.sh)
-2026-07-12T12:12:24.7758391Z Terminate orphan process: pid (30978) (ninja)
-2026-07-12T12:12:24.7780661Z Terminate orphan process: pid (31034) (sh)
-2026-07-12T12:12:24.7815702Z Terminate orphan process: pid (31035) (meson)
-2026-07-12T12:12:24.7823980Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-java@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

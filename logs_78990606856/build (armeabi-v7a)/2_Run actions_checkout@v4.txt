@@ -1,0 +1,207 @@
+﻿2026-07-12T12:45:22.6304870Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-12T12:45:22.6313844Z ##[group]Run actions/checkout@v4
+2026-07-12T12:45:22.6314564Z with:
+2026-07-12T12:45:22.6314992Z   submodules: recursive
+2026-07-12T12:45:22.6315484Z   repository: belugaQAQ/wiliwili
+2026-07-12T12:45:22.6319713Z   token: ***
+2026-07-12T12:45:22.6320151Z   ssh-strict: true
+2026-07-12T12:45:22.6320593Z   ssh-user: git
+2026-07-12T12:45:22.6321273Z   persist-credentials: true
+2026-07-12T12:45:22.6321761Z   clean: true
+2026-07-12T12:45:22.6322203Z   sparse-checkout-cone-mode: true
+2026-07-12T12:45:22.6322713Z   fetch-depth: 1
+2026-07-12T12:45:22.6323145Z   fetch-tags: false
+2026-07-12T12:45:22.6323645Z   show-progress: true
+2026-07-12T12:45:22.6324086Z   lfs: false
+2026-07-12T12:45:22.6324756Z   set-safe-directory: true
+2026-07-12T12:45:22.6325636Z env:
+2026-07-12T12:45:22.6326401Z   ANDROID_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:45:22.6327661Z   ANDROID_SDK_ROOT: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:45:22.6328937Z   ANDROID_NDK_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-ndk-r29
+2026-07-12T12:45:22.6329820Z ##[endgroup]
+2026-07-12T12:45:22.7365962Z Syncing repository: belugaQAQ/wiliwili
+2026-07-12T12:45:22.7368656Z ##[group]Getting Git version info
+2026-07-12T12:45:22.7369718Z Working directory is '/home/runner/work/wiliwili/wiliwili'
+2026-07-12T12:45:22.7371439Z [command]/usr/bin/git version
+2026-07-12T12:45:22.7439984Z git version 2.54.0
+2026-07-12T12:45:22.7496801Z ##[endgroup]
+2026-07-12T12:45:22.7515971Z Temporarily overriding HOME='/home/runner/work/_temp/a0cc9dd1-aeeb-4ad4-9e52-9d83bb9ff04f' before making global git config changes
+2026-07-12T12:45:22.7518940Z Adding repository directory to the temporary git global config as a safe directory
+2026-07-12T12:45:22.7522015Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/wiliwili/wiliwili
+2026-07-12T12:45:22.7581178Z Deleting the contents of '/home/runner/work/wiliwili/wiliwili'
+2026-07-12T12:45:22.7585125Z ##[group]Initializing the repository
+2026-07-12T12:45:22.7590650Z [command]/usr/bin/git init /home/runner/work/wiliwili/wiliwili
+2026-07-12T12:45:22.7688467Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-07-12T12:45:22.7694864Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-07-12T12:45:22.7695876Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-07-12T12:45:22.7696925Z hint: call:
+2026-07-12T12:45:22.7697534Z hint:
+2026-07-12T12:45:22.7698219Z hint: 	git config --global init.defaultBranch <name>
+2026-07-12T12:45:22.7698869Z hint:
+2026-07-12T12:45:22.7699439Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-07-12T12:45:22.7700347Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-07-12T12:45:22.7701775Z hint:
+2026-07-12T12:45:22.7702812Z hint: 	git branch -m <name>
+2026-07-12T12:45:22.7703521Z hint:
+2026-07-12T12:45:22.7704461Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-07-12T12:45:22.7706003Z Initialized empty Git repository in /home/runner/work/wiliwili/wiliwili/.git/
+2026-07-12T12:45:22.7708583Z [command]/usr/bin/git remote add origin https://github.com/belugaQAQ/wiliwili
+2026-07-12T12:45:22.7756914Z ##[endgroup]
+2026-07-12T12:45:22.7758068Z ##[group]Disabling automatic garbage collection
+2026-07-12T12:45:22.7762057Z [command]/usr/bin/git config --local gc.auto 0
+2026-07-12T12:45:22.7796161Z ##[endgroup]
+2026-07-12T12:45:22.7797240Z ##[group]Setting up auth
+2026-07-12T12:45:22.7804582Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-07-12T12:45:22.7846415Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-07-12T12:45:22.8238359Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-07-12T12:45:22.8276898Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-07-12T12:45:22.8519974Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:45:22.8558776Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-07-12T12:45:22.8806569Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-07-12T12:45:22.8850149Z ##[endgroup]
+2026-07-12T12:45:22.8851667Z ##[group]Fetching the repository
+2026-07-12T12:45:22.8861444Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +6a1b593bfe2c335fa7a81615bfb20c3e7d4aba9a:refs/remotes/origin/yoga
+2026-07-12T12:45:24.0995483Z From https://github.com/belugaQAQ/wiliwili
+2026-07-12T12:45:24.0997119Z  * [new ref]         6a1b593bfe2c335fa7a81615bfb20c3e7d4aba9a -> origin/yoga
+2026-07-12T12:45:24.1035048Z ##[endgroup]
+2026-07-12T12:45:24.1036360Z ##[group]Determining the checkout info
+2026-07-12T12:45:24.1037959Z ##[endgroup]
+2026-07-12T12:45:24.1043428Z [command]/usr/bin/git sparse-checkout disable
+2026-07-12T12:45:24.1098890Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-07-12T12:45:24.1135222Z ##[group]Checking out the ref
+2026-07-12T12:45:24.1139505Z [command]/usr/bin/git checkout --progress --force -B yoga refs/remotes/origin/yoga
+2026-07-12T12:45:24.2836308Z Switched to a new branch 'yoga'
+2026-07-12T12:45:24.2838049Z branch 'yoga' set up to track 'origin/yoga'.
+2026-07-12T12:45:24.2858387Z ##[endgroup]
+2026-07-12T12:45:24.2860359Z ##[group]Setting up auth for fetching submodules
+2026-07-12T12:45:24.2866089Z [command]/usr/bin/git config --global http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-07-12T12:45:24.2913941Z [command]/usr/bin/git config --global --unset-all url.https://github.com/.insteadOf
+2026-07-12T12:45:24.2952751Z [command]/usr/bin/git config --global --add url.https://github.com/.insteadOf git@github.com:
+2026-07-12T12:45:24.2992684Z [command]/usr/bin/git config --global --add url.https://github.com/.insteadOf org-157481292@github.com:
+2026-07-12T12:45:24.3033983Z ##[endgroup]
+2026-07-12T12:45:24.3036455Z ##[group]Fetching submodules
+2026-07-12T12:45:24.3043876Z [command]/usr/bin/git submodule sync --recursive
+2026-07-12T12:45:24.3317645Z [command]/usr/bin/git -c protocol.version=2 submodule update --init --force --depth=1 --recursive
+2026-07-12T12:45:24.3583754Z Submodule 'library/MemoryModule' (https://github.com/xfangfang/MemoryModule.git) registered for path 'library/MemoryModule'
+2026-07-12T12:45:24.3605266Z Submodule 'library/OpenCC' (https://github.com/xfangfang/OpenCC.git) registered for path 'library/OpenCC'
+2026-07-12T12:45:24.3611666Z Submodule 'library/QR-Code-generator' (https://github.com/nayuki/QR-Code-generator.git) registered for path 'library/QR-Code-generator'
+2026-07-12T12:45:24.3619616Z Submodule 'library/borealis' (https://github.com/xfangfang/borealis.git) registered for path 'library/borealis'
+2026-07-12T12:45:24.3627669Z Submodule 'library/cpr' (https://github.com/xfangfang/cpr.git) registered for path 'library/cpr'
+2026-07-12T12:45:24.3632869Z Submodule 'library/libpdr' (https://github.com/xfangfang/libpdr.git) registered for path 'library/libpdr'
+2026-07-12T12:45:24.3638311Z Submodule 'library/lunasvg' (https://github.com/sammycage/lunasvg.git) registered for path 'library/lunasvg'
+2026-07-12T12:45:24.3644299Z Submodule 'library/mongoose' (https://github.com/xfangfang/mongoose.git) registered for path 'library/mongoose'
+2026-07-12T12:45:24.3649719Z Submodule 'library/pystring' (https://github.com/imageworks/pystring.git) registered for path 'library/pystring'
+2026-07-12T12:45:24.3654699Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/MemoryModule'...
+2026-07-12T12:45:24.7058031Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/OpenCC'...
+2026-07-12T12:45:25.6805993Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/QR-Code-generator'...
+2026-07-12T12:45:26.0793538Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/borealis'...
+2026-07-12T12:45:26.9707139Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/cpr'...
+2026-07-12T12:45:27.3805576Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/libpdr'...
+2026-07-12T12:45:27.6779875Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/lunasvg'...
+2026-07-12T12:45:28.1233249Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/mongoose'...
+2026-07-12T12:45:29.2617159Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/pystring'...
+2026-07-12T12:45:30.2344805Z From https://github.com/xfangfang/MemoryModule
+2026-07-12T12:45:30.2425340Z  * branch            7739ba4b2d87395446bbdcad6ae8bf9131b4250b -> FETCH_HEAD
+2026-07-12T12:45:30.2426045Z Submodule path 'library/MemoryModule': checked out '7739ba4b2d87395446bbdcad6ae8bf9131b4250b'
+2026-07-12T12:45:30.3388258Z Submodule path 'library/OpenCC': checked out 'ccae908834c2fe41ba02141fa5d0eef178a45080'
+2026-07-12T12:45:31.0409992Z From https://github.com/nayuki/QR-Code-generator
+2026-07-12T12:45:31.0410973Z  * branch            720f62bddb7226106071d4728c292cb1df519ceb -> FETCH_HEAD
+2026-07-12T12:45:31.0533522Z Submodule path 'library/QR-Code-generator': checked out '720f62bddb7226106071d4728c292cb1df519ceb'
+2026-07-12T12:45:31.1793214Z Submodule path 'library/borealis': checked out '5f08b286f3df737f3321d2247a6fe633fcead03c'
+2026-07-12T12:45:31.1818287Z Submodule 'library/lib/extern/SDL' (https://github.com/libsdl-org/SDL.git) registered for path 'library/borealis/library/lib/extern/SDL'
+2026-07-12T12:45:31.1823021Z Submodule 'library/lib/extern/glfw' (https://github.com/xfangfang/glfw.git) registered for path 'library/borealis/library/lib/extern/glfw'
+2026-07-12T12:45:31.1855327Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/borealis/library/lib/extern/SDL'...
+2026-07-12T12:45:33.2245809Z Cloning into '/home/runner/work/wiliwili/wiliwili/library/borealis/library/lib/extern/glfw'...
+2026-07-12T12:45:36.0504048Z From https://github.com/libsdl-org/SDL
+2026-07-12T12:45:36.0504940Z  * branch            15ead9a40d09a1eb9972215cceac2bf29c9b77f6 -> FETCH_HEAD
+2026-07-12T12:45:36.3580333Z Submodule path 'library/borealis/library/lib/extern/SDL': checked out '15ead9a40d09a1eb9972215cceac2bf29c9b77f6'
+2026-07-12T12:45:36.3935644Z Submodule path 'library/borealis/library/lib/extern/glfw': checked out '892256c3f630739fb02552544b8d83240883ec8a'
+2026-07-12T12:45:37.1457032Z From https://github.com/xfangfang/cpr
+2026-07-12T12:45:37.1457604Z  * branch            ef35a614f1feb6ba0d4de13b1950bcaf7faad060 -> FETCH_HEAD
+2026-07-12T12:45:37.1649792Z Submodule path 'library/cpr': checked out 'ef35a614f1feb6ba0d4de13b1950bcaf7faad060'
+2026-07-12T12:45:37.1735941Z Submodule path 'library/libpdr': checked out '9dd3ab920940adac013a3cf40e3a5805d7e193e1'
+2026-07-12T12:45:37.9021952Z From https://github.com/sammycage/lunasvg
+2026-07-12T12:45:37.9023214Z  * branch            f924651b85cac47dbe15f51a4aa320461fc1d07b -> FETCH_HEAD
+2026-07-12T12:45:37.9152509Z Submodule path 'library/lunasvg': checked out 'f924651b85cac47dbe15f51a4aa320461fc1d07b'
+2026-07-12T12:45:38.8693456Z From https://github.com/xfangfang/mongoose
+2026-07-12T12:45:38.8694144Z  * branch            4328842400370f62d00b6a6b23f1cbe0cded4073 -> FETCH_HEAD
+2026-07-12T12:45:39.1786969Z Submodule path 'library/mongoose': checked out '4328842400370f62d00b6a6b23f1cbe0cded4073'
+2026-07-12T12:45:39.8242032Z From https://github.com/imageworks/pystring
+2026-07-12T12:45:39.8243124Z  * branch            7d16bc814ccb4cad03c300dcb77440034caa84f7 -> FETCH_HEAD
+2026-07-12T12:45:39.8316461Z Submodule path 'library/pystring': checked out '7d16bc814ccb4cad03c300dcb77440034caa84f7'
+2026-07-12T12:45:39.8352103Z [command]/usr/bin/git submodule foreach --recursive git config --local gc.auto 0
+2026-07-12T12:45:39.8607480Z Entering 'library/MemoryModule'
+2026-07-12T12:45:39.8654101Z Entering 'library/OpenCC'
+2026-07-12T12:45:39.8696297Z Entering 'library/QR-Code-generator'
+2026-07-12T12:45:39.8737159Z Entering 'library/borealis'
+2026-07-12T12:45:39.8778964Z Entering 'library/borealis/library/lib/extern/SDL'
+2026-07-12T12:45:39.8824116Z Entering 'library/borealis/library/lib/extern/glfw'
+2026-07-12T12:45:39.8868293Z Entering 'library/cpr'
+2026-07-12T12:45:39.8909019Z Entering 'library/libpdr'
+2026-07-12T12:45:39.8949419Z Entering 'library/lunasvg'
+2026-07-12T12:45:39.9032293Z Entering 'library/mongoose'
+2026-07-12T12:45:39.9042590Z Entering 'library/pystring'
+2026-07-12T12:45:39.9094610Z ##[endgroup]
+2026-07-12T12:45:39.9095023Z ##[group]Persisting credentials for submodules
+2026-07-12T12:45:39.9101685Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'url\.https\:\/\/github\.com\/\.insteadOf' && git config --local --unset-all 'url.https://github.com/.insteadOf' || :"
+2026-07-12T12:45:39.9337454Z Entering 'library/MemoryModule'
+2026-07-12T12:45:39.9387281Z Entering 'library/OpenCC'
+2026-07-12T12:45:39.9435248Z Entering 'library/QR-Code-generator'
+2026-07-12T12:45:39.9482189Z Entering 'library/borealis'
+2026-07-12T12:45:39.9529141Z Entering 'library/borealis/library/lib/extern/SDL'
+2026-07-12T12:45:39.9579432Z Entering 'library/borealis/library/lib/extern/glfw'
+2026-07-12T12:45:39.9628692Z Entering 'library/cpr'
+2026-07-12T12:45:39.9675676Z Entering 'library/libpdr'
+2026-07-12T12:45:39.9721361Z Entering 'library/lunasvg'
+2026-07-12T12:45:39.9767917Z Entering 'library/mongoose'
+2026-07-12T12:45:39.9819933Z Entering 'library/pystring'
+2026-07-12T12:45:39.9879433Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local 'http.https://github.com/.extraheader' 'AUTHORIZATION: basic ***' && git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-07-12T12:45:40.0113423Z Entering 'library/MemoryModule'
+2026-07-12T12:45:40.0157874Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/MemoryModule/config	remote.origin.url
+2026-07-12T12:45:40.0179160Z Entering 'library/OpenCC'
+2026-07-12T12:45:40.0220223Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/OpenCC/config	remote.origin.url
+2026-07-12T12:45:40.0242764Z Entering 'library/QR-Code-generator'
+2026-07-12T12:45:40.0284232Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/QR-Code-generator/config	remote.origin.url
+2026-07-12T12:45:40.0305189Z Entering 'library/borealis'
+2026-07-12T12:45:40.0346166Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/borealis/config	remote.origin.url
+2026-07-12T12:45:40.0368222Z Entering 'library/borealis/library/lib/extern/SDL'
+2026-07-12T12:45:40.0410381Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/borealis/modules/library/lib/extern/SDL/config	remote.origin.url
+2026-07-12T12:45:40.0434438Z Entering 'library/borealis/library/lib/extern/glfw'
+2026-07-12T12:45:40.0476332Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/borealis/modules/library/lib/extern/glfw/config	remote.origin.url
+2026-07-12T12:45:40.0499627Z Entering 'library/cpr'
+2026-07-12T12:45:40.0540505Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/cpr/config	remote.origin.url
+2026-07-12T12:45:40.0562533Z Entering 'library/libpdr'
+2026-07-12T12:45:40.0603318Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/libpdr/config	remote.origin.url
+2026-07-12T12:45:40.0624633Z Entering 'library/lunasvg'
+2026-07-12T12:45:40.0665852Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/lunasvg/config	remote.origin.url
+2026-07-12T12:45:40.0687832Z Entering 'library/mongoose'
+2026-07-12T12:45:40.0729607Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/mongoose/config	remote.origin.url
+2026-07-12T12:45:40.0756758Z Entering 'library/pystring'
+2026-07-12T12:45:40.0798025Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/pystring/config	remote.origin.url
+2026-07-12T12:45:40.0884111Z [command]/usr/bin/git submodule foreach --recursive git config --local --add 'url.https://github.com/.insteadOf' 'git@github.com:'
+2026-07-12T12:45:40.1123329Z Entering 'library/MemoryModule'
+2026-07-12T12:45:40.1167551Z Entering 'library/OpenCC'
+2026-07-12T12:45:40.1211056Z Entering 'library/QR-Code-generator'
+2026-07-12T12:45:40.1253074Z Entering 'library/borealis'
+2026-07-12T12:45:40.1295910Z Entering 'library/borealis/library/lib/extern/SDL'
+2026-07-12T12:45:40.1342028Z Entering 'library/borealis/library/lib/extern/glfw'
+2026-07-12T12:45:40.1386490Z Entering 'library/cpr'
+2026-07-12T12:45:40.1427592Z Entering 'library/libpdr'
+2026-07-12T12:45:40.1469608Z Entering 'library/lunasvg'
+2026-07-12T12:45:40.1510701Z Entering 'library/mongoose'
+2026-07-12T12:45:40.1558184Z Entering 'library/pystring'
+2026-07-12T12:45:40.1614655Z [command]/usr/bin/git submodule foreach --recursive git config --local --add 'url.https://github.com/.insteadOf' 'org-157481292@github.com:'
+2026-07-12T12:45:40.1850485Z Entering 'library/MemoryModule'
+2026-07-12T12:45:40.1891455Z Entering 'library/OpenCC'
+2026-07-12T12:45:40.1934296Z Entering 'library/QR-Code-generator'
+2026-07-12T12:45:40.1974949Z Entering 'library/borealis'
+2026-07-12T12:45:40.2017340Z Entering 'library/borealis/library/lib/extern/SDL'
+2026-07-12T12:45:40.2062786Z Entering 'library/borealis/library/lib/extern/glfw'
+2026-07-12T12:45:40.2107247Z Entering 'library/cpr'
+2026-07-12T12:45:40.2149227Z Entering 'library/libpdr'
+2026-07-12T12:45:40.2190685Z Entering 'library/lunasvg'
+2026-07-12T12:45:40.2231905Z Entering 'library/mongoose'
+2026-07-12T12:45:40.2280381Z Entering 'library/pystring'
+2026-07-12T12:45:40.2336259Z ##[endgroup]
+2026-07-12T12:45:40.2391476Z [command]/usr/bin/git log -1 --format=%H
+2026-07-12T12:45:40.2421500Z 6a1b593bfe2c335fa7a81615bfb20c3e7d4aba9a

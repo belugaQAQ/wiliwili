@@ -1,0 +1,31 @@
+﻿2026-07-12T12:52:45.8137937Z ##[group]Run cd library/borealis
+2026-07-12T12:52:45.8138537Z [36;1mcd library/borealis[0m
+2026-07-12T12:52:45.8138808Z [36;1mbash build_libromfs_generator.sh[0m
+2026-07-12T12:52:45.8171770Z shell: /usr/bin/bash -e {0}
+2026-07-12T12:52:45.8172019Z env:
+2026-07-12T12:52:45.8172440Z   ANDROID_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:52:45.8173169Z   ANDROID_SDK_ROOT: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:52:45.8173871Z   ANDROID_NDK_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-ndk-r29
+2026-07-12T12:52:45.8174700Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:52:45.8175177Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:52:45.8175561Z ##[endgroup]
+2026-07-12T12:52:45.8244746Z Build libromfs-generator
+2026-07-12T12:52:47.0377959Z -- The C compiler identification is GNU 13.3.0
+2026-07-12T12:52:47.3201368Z -- The CXX compiler identification is GNU 13.3.0
+2026-07-12T12:52:47.4753515Z -- Detecting C compiler ABI info
+2026-07-12T12:52:47.7115028Z -- Detecting C compiler ABI info - done
+2026-07-12T12:52:47.7281241Z -- Check for working C compiler: /usr/bin/cc - skipped
+2026-07-12T12:52:47.7331154Z -- Detecting C compile features
+2026-07-12T12:52:47.7338787Z -- Detecting C compile features - done
+2026-07-12T12:52:47.7684851Z -- Detecting CXX compiler ABI info
+2026-07-12T12:52:47.8700787Z -- Detecting CXX compiler ABI info - done
+2026-07-12T12:52:47.8870769Z -- Check for working CXX compiler: /usr/bin/c++ - skipped
+2026-07-12T12:52:47.8874643Z -- Detecting CXX compile features
+2026-07-12T12:52:47.8882227Z -- Detecting CXX compile features - done
+2026-07-12T12:52:47.9048927Z -- Configuring done (1.6s)
+2026-07-12T12:52:47.9094084Z -- Generating done (0.0s)
+2026-07-12T12:52:47.9098271Z -- Build files have been written to: /home/runner/work/wiliwili/wiliwili/library/borealis/build_libromfs_generator
+2026-07-12T12:52:49.4150763Z [1/2] Building CXX object CMakeFiles/libromfs-generator.dir/source/main.cpp.o
+2026-07-12T12:52:49.4656148Z [2/2] Linking CXX executable libromfs-generator
+2026-07-12T12:52:49.4685348Z Build libromfs-generator: ./libromfs-generator
+2026-07-12T12:52:49.4704998Z Remove temp build dir: build_libromfs_generator

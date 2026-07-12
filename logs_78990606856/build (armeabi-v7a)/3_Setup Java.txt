@@ -1,0 +1,34 @@
+﻿2026-07-12T12:45:40.2697867Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-12T12:45:40.2699610Z ##[group]Run actions/setup-java@v4
+2026-07-12T12:45:40.2699871Z with:
+2026-07-12T12:45:40.2700085Z   java-version: 17
+2026-07-12T12:45:40.2700298Z   distribution: temurin
+2026-07-12T12:45:40.2700526Z   java-package: jdk
+2026-07-12T12:45:40.2700949Z   check-latest: false
+2026-07-12T12:45:40.2701201Z   server-id: github
+2026-07-12T12:45:40.2701415Z   server-username: GITHUB_ACTOR
+2026-07-12T12:45:40.2701684Z   server-password: GITHUB_TOKEN
+2026-07-12T12:45:40.2701932Z   overwrite-settings: true
+2026-07-12T12:45:40.2702159Z   job-status: success
+2026-07-12T12:45:40.2704800Z   token: ***
+2026-07-12T12:45:40.2704996Z env:
+2026-07-12T12:45:40.2705401Z   ANDROID_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:45:40.2706136Z   ANDROID_SDK_ROOT: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:45:40.2706806Z   ANDROID_NDK_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-ndk-r29
+2026-07-12T12:45:40.2707267Z ##[endgroup]
+2026-07-12T12:45:40.4346804Z ##[group]Installed distributions
+2026-07-12T12:45:40.4408511Z Resolved Java 17.0.19+10 from tool-cache
+2026-07-12T12:45:40.4409061Z Setting Java 17.0.19+10 as the default
+2026-07-12T12:45:40.4419693Z (node:2994) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-07-12T12:45:40.4420618Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-07-12T12:45:40.4423348Z Creating toolchains.xml for JDK version 17 from temurin
+2026-07-12T12:45:40.4493746Z Writing to /home/runner/.m2/toolchains.xml
+2026-07-12T12:45:40.4494157Z 
+2026-07-12T12:45:40.4494308Z Java configuration:
+2026-07-12T12:45:40.4494647Z   Distribution: temurin
+2026-07-12T12:45:40.4494984Z   Version: 17.0.19+10
+2026-07-12T12:45:40.4495491Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:45:40.4495941Z 
+2026-07-12T12:45:40.4496385Z ##[endgroup]
+2026-07-12T12:45:40.4518477Z Creating settings.xml with server-id: github
+2026-07-12T12:45:40.4528779Z Writing to /home/runner/.m2/settings.xml

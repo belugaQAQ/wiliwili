@@ -1,0 +1,81 @@
+﻿2026-07-12T12:53:03.3473234Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-12T12:53:03.3474436Z Post job cleanup.
+2026-07-12T12:53:03.4456852Z [command]/usr/bin/git version
+2026-07-12T12:53:03.4537787Z git version 2.54.0
+2026-07-12T12:53:03.4579119Z Temporarily overriding HOME='/home/runner/work/_temp/ae3d036f-40da-4ec1-abdb-dc7cfc7a0776' before making global git config changes
+2026-07-12T12:53:03.4580506Z Adding repository directory to the temporary git global config as a safe directory
+2026-07-12T12:53:03.4584712Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/wiliwili/wiliwili
+2026-07-12T12:53:03.4632116Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-07-12T12:53:03.4673442Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-07-12T12:53:03.4935324Z Entering 'library/MemoryModule'
+2026-07-12T12:53:03.4984413Z Entering 'library/OpenCC'
+2026-07-12T12:53:03.5057079Z Entering 'library/QR-Code-generator'
+2026-07-12T12:53:03.5120052Z Entering 'library/borealis'
+2026-07-12T12:53:03.5179906Z Entering 'library/borealis/library/lib/extern/SDL'
+2026-07-12T12:53:03.5234133Z Entering 'library/borealis/library/lib/extern/glfw'
+2026-07-12T12:53:03.5288046Z Entering 'library/cpr'
+2026-07-12T12:53:03.5337701Z Entering 'library/libpdr'
+2026-07-12T12:53:03.5390023Z Entering 'library/lunasvg'
+2026-07-12T12:53:03.5438296Z Entering 'library/mongoose'
+2026-07-12T12:53:03.5497345Z Entering 'library/pystring'
+2026-07-12T12:53:03.5564290Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-07-12T12:53:03.5598616Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.5609580Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-07-12T12:53:03.5650197Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-07-12T12:53:03.5886601Z Entering 'library/MemoryModule'
+2026-07-12T12:53:03.5912756Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.5949556Z Entering 'library/OpenCC'
+2026-07-12T12:53:03.5976470Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6014974Z Entering 'library/QR-Code-generator'
+2026-07-12T12:53:03.6041515Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6079537Z Entering 'library/borealis'
+2026-07-12T12:53:03.6107064Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6143866Z Entering 'library/borealis/library/lib/extern/SDL'
+2026-07-12T12:53:03.6171536Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6212551Z Entering 'library/borealis/library/lib/extern/glfw'
+2026-07-12T12:53:03.6240432Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6280996Z Entering 'library/cpr'
+2026-07-12T12:53:03.6308056Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6344628Z Entering 'library/libpdr'
+2026-07-12T12:53:03.6372185Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6408725Z Entering 'library/lunasvg'
+2026-07-12T12:53:03.6435803Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6477966Z Entering 'library/mongoose'
+2026-07-12T12:53:03.6507368Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6556008Z Entering 'library/pystring'
+2026-07-12T12:53:03.6584183Z http.https://github.com/.extraheader
+2026-07-12T12:53:03.6642060Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.6688283Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-07-12T12:53:03.6948814Z Entering 'library/MemoryModule'
+2026-07-12T12:53:03.6968443Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/MemoryModule/config	remote.origin.url
+2026-07-12T12:53:03.6988603Z Entering 'library/OpenCC'
+2026-07-12T12:53:03.7009885Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/OpenCC/config	remote.origin.url
+2026-07-12T12:53:03.7031406Z Entering 'library/QR-Code-generator'
+2026-07-12T12:53:03.7052974Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/QR-Code-generator/config	remote.origin.url
+2026-07-12T12:53:03.7072508Z Entering 'library/borealis'
+2026-07-12T12:53:03.7093661Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/borealis/config	remote.origin.url
+2026-07-12T12:53:03.7114279Z Entering 'library/borealis/library/lib/extern/SDL'
+2026-07-12T12:53:03.7136093Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/borealis/modules/library/lib/extern/SDL/config	remote.origin.url
+2026-07-12T12:53:03.7159290Z Entering 'library/borealis/library/lib/extern/glfw'
+2026-07-12T12:53:03.7181420Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/borealis/modules/library/lib/extern/glfw/config	remote.origin.url
+2026-07-12T12:53:03.7203755Z Entering 'library/cpr'
+2026-07-12T12:53:03.7225099Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/cpr/config	remote.origin.url
+2026-07-12T12:53:03.7246405Z Entering 'library/libpdr'
+2026-07-12T12:53:03.7267882Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/libpdr/config	remote.origin.url
+2026-07-12T12:53:03.7288963Z Entering 'library/lunasvg'
+2026-07-12T12:53:03.7312583Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/lunasvg/config	remote.origin.url
+2026-07-12T12:53:03.7333055Z Entering 'library/mongoose'
+2026-07-12T12:53:03.7354094Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/mongoose/config	remote.origin.url
+2026-07-12T12:53:03.7379670Z Entering 'library/pystring'
+2026-07-12T12:53:03.7400977Z file:/home/runner/work/wiliwili/wiliwili/.git/modules/library/pystring/config	remote.origin.url
+2026-07-12T12:53:03.7439968Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/MemoryModule/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7479369Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/OpenCC/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7514591Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/QR-Code-generator/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7549564Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/borealis/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7585030Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/borealis/modules/library/lib/extern/SDL/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7619791Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/borealis/modules/library/lib/extern/glfw/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7654436Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/cpr/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7688932Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/libpdr/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7735831Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/lunasvg/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7768592Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/mongoose/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T12:53:03.7802860Z [command]/usr/bin/git config --file /home/runner/work/wiliwili/wiliwili/.git/modules/library/pystring/config --name-only --get-regexp ^includeIf\.gitdir:

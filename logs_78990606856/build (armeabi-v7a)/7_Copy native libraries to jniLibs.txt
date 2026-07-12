@@ -1,0 +1,29 @@
+﻿2026-07-12T12:51:18.8362034Z ##[group]Run case "armeabi-v7a" in
+2026-07-12T12:51:18.8362362Z [36;1mcase "armeabi-v7a" in[0m
+2026-07-12T12:51:18.8373557Z [36;1m  arm64-v8a)   ARCH=arm64  ;;[0m
+2026-07-12T12:51:18.8373965Z [36;1m  armeabi-v7a) ARCH=armv7l ;;[0m
+2026-07-12T12:51:18.8374245Z [36;1mesac[0m
+2026-07-12T12:51:18.8374490Z [36;1mmkdir -p android/app/libs/armeabi-v7a[0m
+2026-07-12T12:51:18.8374971Z [36;1mcp scripts/android/buildscripts/prefix/${ARCH}/lib/*.so android/app/libs/armeabi-v7a/[0m
+2026-07-12T12:51:18.8375460Z [36;1mecho "=== jniLibs for armeabi-v7a ==="[0m
+2026-07-12T12:51:18.8375778Z [36;1mls -la android/app/libs/armeabi-v7a/[0m
+2026-07-12T12:51:18.8411332Z shell: /usr/bin/bash -e {0}
+2026-07-12T12:51:18.8411692Z env:
+2026-07-12T12:51:18.8412114Z   ANDROID_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:51:18.8412810Z   ANDROID_SDK_ROOT: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:51:18.8413526Z   ANDROID_NDK_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-ndk-r29
+2026-07-12T12:51:18.8414095Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:51:18.8414681Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:51:18.8415046Z ##[endgroup]
+2026-07-12T12:51:18.8770042Z === jniLibs for armeabi-v7a ===
+2026-07-12T12:51:18.8786970Z total 87200
+2026-07-12T12:51:18.8787351Z drwxr-xr-x 2 runner runner     4096 Jul 12 12:51 .
+2026-07-12T12:51:18.8787888Z drwxr-xr-x 3 runner runner     4096 Jul 12 12:51 ..
+2026-07-12T12:51:18.8788332Z -rwxr-xr-x 1 runner runner 46953660 Jul 12 12:51 libavcodec.so
+2026-07-12T12:51:18.8788799Z -rwxr-xr-x 1 runner runner    77796 Jul 12 12:51 libavdevice.so
+2026-07-12T12:51:18.8789195Z -rwxr-xr-x 1 runner runner 15092900 Jul 12 12:51 libavfilter.so
+2026-07-12T12:51:18.8789550Z -rwxr-xr-x 1 runner runner 13651664 Jul 12 12:51 libavformat.so
+2026-07-12T12:51:18.8789923Z -rwxr-xr-x 1 runner runner  2642352 Jul 12 12:51 libavutil.so
+2026-07-12T12:51:18.8790272Z -rwxr-xr-x 1 runner runner  7486868 Jul 12 12:51 libmpv.so
+2026-07-12T12:51:18.8791151Z -rwxr-xr-x 1 runner runner   290708 Jul 12 12:51 libswresample.so
+2026-07-12T12:51:18.8791784Z -rwxr-xr-x 1 runner runner  3077940 Jul 12 12:51 libswscale.so

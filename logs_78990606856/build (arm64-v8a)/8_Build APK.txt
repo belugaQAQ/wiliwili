@@ -1,0 +1,27 @@
+﻿2026-07-12T12:52:49.5293198Z ##[group]Run chmod +x gradlew || true
+2026-07-12T12:52:49.5293809Z [36;1mchmod +x gradlew || true[0m
+2026-07-12T12:52:49.5294537Z [36;1m# Limit CMake/externalNativeBuild to this matrix ABI only (build.gradle's[0m
+2026-07-12T12:52:49.5295534Z [36;1m# abiFilters otherwise forces both ABIs, but each job built one libmpv).[0m
+2026-07-12T12:52:49.5296481Z [36;1m./gradlew assembleDebug -Pandroid.injected.build.abi=arm64-v8a[0m
+2026-07-12T12:52:49.5343778Z shell: /usr/bin/bash -e {0}
+2026-07-12T12:52:49.5344205Z env:
+2026-07-12T12:52:49.5344971Z   ANDROID_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:52:49.5346296Z   ANDROID_SDK_ROOT: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:52:49.5347629Z   ANDROID_NDK_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-ndk-r29
+2026-07-12T12:52:49.5349116Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:52:49.5350108Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:52:49.5350816Z ##[endgroup]
+2026-07-12T12:52:49.6553355Z Downloading https://services.gradle.org/distributions/gradle-8.9-bin.zip
+2026-07-12T12:52:51.2953810Z ............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%.............100%
+2026-07-12T12:52:52.4916298Z 
+2026-07-12T12:52:52.4918201Z Welcome to Gradle 8.9!
+2026-07-12T12:52:52.4918682Z 
+2026-07-12T12:52:52.4922065Z Here are the highlights of this release:
+2026-07-12T12:52:52.4928620Z  - Enhanced Error and Warning Messages
+2026-07-12T12:52:52.4929453Z  - IDE Integration Improvements
+2026-07-12T12:52:52.4930163Z  - Daemon JVM Information
+2026-07-12T12:52:52.4930470Z 
+2026-07-12T12:52:52.4932498Z For more details see https://docs.gradle.org/8.9/release-notes.html
+2026-07-12T12:52:52.4933036Z 
+2026-07-12T12:52:52.6925530Z Starting a Gradle Daemon (subsequent builds will be faster)
+2026-07-12T12:53:18.7647955Z ##[error]The operation was canceled.
