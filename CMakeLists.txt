@@ -250,11 +250,12 @@ if (PLATFORM_ANDROID)
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     add_subdirectory(${BOREALIS_LIBRARY}/lib/extern/SDL EXCLUDE_FROM_ALL)
     # SDL 2.28.5 still calls ALooper_pollAll, which NDK r24+ marks as
-    # __attribute__((unavailable)) → hard compile error. Downgrade it so the
-    # old SDL source compiles cleanly under the buildscripts NDK (r29).
+    # __attribute__((unavailable)) → hard compile error. The clang diagnostic
+    # group is "availability" (confirmed by the compiler's own hint), so use
+    # -Wno-availability to let the old SDL source compile under NDK r29.
     foreach(_t SDL2 SDL2-static)
         if(TARGET ${_t})
-            target_compile_options(${_t} PRIVATE -Wno-error=unavailable -Wno-unavailable)
+            target_compile_options(${_t} PRIVATE -Wno-availability)
         endif()
     endforeach()
     unset(_t)
