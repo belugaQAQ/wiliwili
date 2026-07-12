@@ -33,9 +33,13 @@ case $ABI in
 esac
 
 CC=${TARGET}${ANDROID_API}-clang
+TOOLCHAIN=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64
 PREFIX=${INSTALL_DIR}/${ABI}
 
 echo "Building FFmpeg for Android ${ABI}..."
+
+# Add NDK toolchain to PATH so cross-compiler can be found
+export PATH="${TOOLCHAIN}/bin:${PATH}"
 
 if [ ! -d "$SOURCE_DIR" ]; then
     git clone --depth 1 https://github.com/FFmpeg/FFmpeg.git "$SOURCE_DIR"
@@ -50,7 +54,7 @@ cd "$SOURCE_DIR"
     --cc=${CC} \
     --target-os=android \
     --arch=${ARCH} \
-    --sysroot=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
+    --sysroot=${TOOLCHAIN}/sysroot \
     --enable-gpl \
     --enable-version3 \
     --enable-shared \

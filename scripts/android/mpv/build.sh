@@ -37,8 +37,12 @@ esac
 
 PREFIX=${INSTALL_DIR}/${ABI}
 FFMPEG_PREFIX=${FFMPEG_DIR}/${ABI}
+TOOLCHAIN=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64
 
 echo "Building libmpv for Android ${ABI}..."
+
+# Add NDK toolchain to PATH so cross-compiler can be found
+export PATH="${TOOLCHAIN}/bin:${PATH}"
 
 if [ ! -d "$SOURCE_DIR" ]; then
     git clone --depth 1 https://github.com/mpv-player/mpv.git "$SOURCE_DIR"
@@ -49,11 +53,11 @@ cd "$SOURCE_DIR"
 # Create meson cross file for Android
 cat > android-cross-${ABI}.ini << EOF
 [binaries]
-c = '${TARGET}${ANDROID_API}-clang'
-cpp = '${TARGET}${ANDROID_API}-clang++'
-ar = '${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
-ranlib = '${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib'
-strip = '${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip'
+c = '${TOOLCHAIN}/bin/${TARGET}${ANDROID_API}-clang'
+cpp = '${TOOLCHAIN}/bin/${TARGET}${ANDROID_API}-clang++'
+ar = '${TOOLCHAIN}/bin/llvm-ar'
+ranlib = '${TOOLCHAIN}/bin/llvm-ranlib'
+strip = '${TOOLCHAIN}/bin/llvm-strip'
 pkgconfig = 'pkg-config'
 
 [host_machine]
@@ -73,7 +77,7 @@ cpp_link_args = ['-landroid', '-llog']
 EOF
 
 export PKG_CONFIG_PATH=${FFMPEG_PREFIX}/lib/pkgconfig
-export PKG_CONFIG_SYSROOT_DIR=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+export PKG_CONFIG_SYSROOT_DIR=${TOOLCHAIN}/sysroot
 
 meson setup build-${ABI} \
     --cross-file android-cross-${ABI}.ini \

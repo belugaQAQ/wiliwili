@@ -33,7 +33,9 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install NDK
-        run: sdkmanager "ndk;26.1.10909125"
+        run: |
+          sdkmanager "ndk;26.1.10909125"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
 
       - name: Install build dependencies
         run: |
@@ -42,13 +44,9 @@ jobs:
 
       - name: Build FFmpeg
         run: bash scripts/android/ffmpeg/build.sh ${{ matrix.abi }}
-        env:
-          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk
 
       - name: Build libmpv
         run: bash scripts/android/mpv/build.sh ${{ matrix.abi }}
-        env:
-          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk
 
       - name: Copy native libraries
         run: |
@@ -61,8 +59,6 @@ jobs:
         run: |
           chmod +x gradlew || true
           ./gradlew assembleDebug
-        env:
-          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
