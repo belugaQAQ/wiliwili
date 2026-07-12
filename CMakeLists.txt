@@ -136,14 +136,14 @@ elseif (APP_PLATFORM_CUSTOM_LIBS)
     #   -DAPP_PLATFORM_INCLUDE="/opt/vita/include" \
     #   -DAPP_PLATFORM_LINK_OPTION="-L/opt/vita/lib -lmpv -lwebp"
 elseif (PLATFORM_ANDROID)
-    # Android: mpv and webp are provided as prebuilt libraries
-    # Set paths via -DMPV_INCLUDE_DIR, -DMPV_LIBRARY, -DWebP_INCLUDE_DIRS, -DWebP_LIBRARY
-    # or via environment variables
-    #
-    # If not passed explicitly, derive them from WILIWILI_PREFIX (pointing at
-    # scripts/android/buildscripts/prefix) and the current ANDROID_ABI, using the
-    # mpv-android arch layout (arm64-v8a -> arm64, armeabi-v7a -> armv7l).
-    if (NOT MPV_INCLUDE_DIR AND NOT MPV_LIBRARY AND ANDROID_ABI)
+    # Android: mpv and webp are built by scripts/android/buildscripts and
+    # installed under ${WILIWILI_PREFIX}/<arch>/{include,lib} (mpv-android
+    # layout: arm64-v8a -> arm64, armeabi-v7a -> armv7l, x86_64 -> x86_64).
+    # Add that prefix to CMAKE_PREFIX_PATH so cmake/FindMPV.cmake's own
+    # find_path / find_library can locate mpv/client.h and libmpv.so
+    # (pre-setting MPV_LIBRARY as a cache var gets clobbered by FindMPV.cmake's
+    # find_library(MPV_LIBRARY_mpv) which appends <VAR>-NOTFOUND on failure).
+    if (ANDROID_ABI)
         if (ANDROID_ABI STREQUAL "arm64-v8a")
             set(_wili_arch arm64)
         elseif (ANDROID_ABI STREQUAL "armeabi-v7a")
@@ -152,8 +152,7 @@ elseif (PLATFORM_ANDROID)
             set(_wili_arch x86_64)
         endif ()
         if (_wili_arch AND EXISTS "${WILIWILI_PREFIX}/${_wili_arch}/include/mpv/client.h")
-            set(MPV_INCLUDE_DIR "${WILIWILI_PREFIX}/${_wili_arch}/include" CACHE PATH "libmpv include dir")
-            set(MPV_LIBRARY "${WILIWILI_PREFIX}/${_wili_arch}/lib/libmpv.so" CACHE FILEPATH "libmpv library")
+            list(PREPEND CMAKE_PREFIX_PATH "${WILIWILI_PREFIX}/${_wili_arch}")
         endif ()
         unset(_wili_arch)
     endif ()
