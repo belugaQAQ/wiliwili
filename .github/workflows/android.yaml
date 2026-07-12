@@ -19,7 +19,10 @@ jobs:
         abi: [ arm64-v8a, armeabi-v7a ]
     env:
       # SDK + NDK are fetched by buildscripts/download.sh; Gradle reuses them.
+      # Clear the runner's preset ANDROID_SDK_ROOT so AGP only sees ANDROID_HOME
+      # (AGP 8.7 fails if both point to different paths).
       ANDROID_HOME: ${{ github.workspace }}/scripts/android/buildscripts/sdk/android-sdk-linux
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/scripts/android/buildscripts/sdk/android-sdk-linux
       ANDROID_NDK_HOME: ${{ github.workspace }}/scripts/android/buildscripts/sdk/android-ndk-r29
     steps:
       - uses: actions/checkout@v4
