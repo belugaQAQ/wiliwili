@@ -240,6 +240,12 @@ elseif (PLATFORM_PS4)
 endif ()
 
 # build borealis qrcode and other third party libraries
+if (PLATFORM_ANDROID)
+    # Build SDL2 from source so borealis' find_library(SDL2) can locate it.
+    # (borealis android-project does add_subdirectory(SDL) before borealis.)
+    set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+    add_subdirectory(${BOREALIS_LIBRARY}/lib/extern/SDL EXCLUDE_FROM_ALL)
+endif ()
 add_subdirectory(library)
 
 # Main Target

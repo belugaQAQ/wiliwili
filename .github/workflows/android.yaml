@@ -45,6 +45,9 @@ jobs:
       - name: Build native deps (FFmpeg + libmpv)
         run: bash scripts/android/build_all.sh ${{ matrix.abi }}
 
+      - name: Build libromfs-generator (host tool for borealis)
+        run: bash library/borealis/build_libromfs_generator.sh
+
       - name: Copy native libraries to jniLibs
         run: |
           case "${{ matrix.abi }}" in
