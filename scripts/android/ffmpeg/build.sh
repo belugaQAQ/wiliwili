@@ -45,19 +45,22 @@ STRIP=${TOOLCHAIN}/bin/llvm-strip
 # Let clang invoke lld itself; passing ld.lld directly confuses FFmpeg configure
 LD=${CC}
 
-# armeabi-v7a needs -march to avoid clang emitting incompatible instructions
+# armeabi-v7a needs explicit flags and -latomic for C11 atomics on API 21
 EXTRA_CFLAGS=""
+EXTRA_LIBS=""
 if [ "$ABI" = "armeabi-v7a" ]; then
     EXTRA_CFLAGS="-march=armv7-a -mfpu=neon -mfloat-abi=softfp"
+    EXTRA_LIBS="-latomic"
 fi
 
 echo "Building FFmpeg for Android ${ABI}..."
 echo "CC=${CC}"
 echo "AR=${AR}"
 echo "EXTRA_CFLAGS=${EXTRA_CFLAGS}"
+echo "EXTRA_LIBS=${EXTRA_LIBS}"
 
 if [ ! -d "$SOURCE_DIR" ]; then
-    git clone --depth 1 --branch n7.1 https://github.com/FFmpeg/FFmpeg.git "$SOURCE_DIR"
+    git clone --depth 1 --branch release/7.1 https://github.com/FFmpeg/FFmpeg.git "$SOURCE_DIR"
 fi
 
 cd "$SOURCE_DIR"
@@ -75,6 +78,7 @@ cd "$SOURCE_DIR"
     --arch=${ARCH} \
     --sysroot=${TOOLCHAIN}/sysroot \
     --extra-cflags="${EXTRA_CFLAGS}" \
+    --extra-libs="${EXTRA_LIBS}" \
     --enable-gpl \
     --enable-version3 \
     --enable-shared \
