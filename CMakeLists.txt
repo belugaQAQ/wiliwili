@@ -153,6 +153,11 @@ elseif (PLATFORM_ANDROID)
         endif ()
         if (_wili_arch AND EXISTS "${WILIWILI_PREFIX}/${_wili_arch}/include/mpv/client.h")
             list(PREPEND CMAKE_PREFIX_PATH "${WILIWILI_PREFIX}/${_wili_arch}")
+            # Android NDK toolchain sets CMAKE_FIND_ROOT_PATH_MODE_{INCLUDE,LIBRARY}=ONLY,
+            # so find_path/find_library only search CMAKE_FIND_ROOT_PATH — NOT
+            # CMAKE_PREFIX_PATH. Add our prefix there too, or FindMPV.cmake's
+            # own find_path/find_library calls won't see the prebuilt mpv.
+            list(PREPEND CMAKE_FIND_ROOT_PATH "${WILIWILI_PREFIX}/${_wili_arch}")
         endif ()
         unset(_wili_arch)
     endif ()
