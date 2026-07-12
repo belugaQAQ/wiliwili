@@ -1,0 +1,411 @@
+﻿2026-07-12T12:11:03.5175146Z ##[group]Run chmod +x gradlew || true
+2026-07-12T12:11:03.5175467Z [36;1mchmod +x gradlew || true[0m
+2026-07-12T12:11:03.5175852Z [36;1m# Limit CMake/externalNativeBuild to this matrix ABI only (build.gradle's[0m
+2026-07-12T12:11:03.5176492Z [36;1m# abiFilters otherwise forces both ABIs, but each job built one libmpv).[0m
+2026-07-12T12:11:03.5177008Z [36;1m./gradlew assembleDebug -Pandroid.injected.build.abi=armeabi-v7a[0m
+2026-07-12T12:11:03.5208669Z shell: /usr/bin/bash -e {0}
+2026-07-12T12:11:03.5208971Z env:
+2026-07-12T12:11:03.5209376Z   ANDROID_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:11:03.5210092Z   ANDROID_SDK_ROOT: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:11:03.5210776Z   ANDROID_NDK_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-ndk-r29
+2026-07-12T12:11:03.5211343Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:11:03.5212128Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:11:03.5212503Z ##[endgroup]
+2026-07-12T12:11:03.6204775Z Downloading https://services.gradle.org/distributions/gradle-8.9-bin.zip
+2026-07-12T12:11:05.1616411Z ............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%.............100%
+2026-07-12T12:11:06.3526301Z 
+2026-07-12T12:11:06.3528018Z Welcome to Gradle 8.9!
+2026-07-12T12:11:06.3528350Z 
+2026-07-12T12:11:06.3530728Z Here are the highlights of this release:
+2026-07-12T12:11:06.3536752Z  - Enhanced Error and Warning Messages
+2026-07-12T12:11:06.3537692Z  - IDE Integration Improvements
+2026-07-12T12:11:06.3538451Z  - Daemon JVM Information
+2026-07-12T12:11:06.3538729Z 
+2026-07-12T12:11:06.3540363Z For more details see https://docs.gradle.org/8.9/release-notes.html
+2026-07-12T12:11:06.3542043Z 
+2026-07-12T12:11:06.5543252Z Starting a Gradle Daemon (subsequent builds will be faster)
+2026-07-12T12:11:31.7562268Z 
+2026-07-12T12:11:31.7592575Z > Configure project :app
+2026-07-12T12:11:31.7594067Z Checking the license for package NDK (Side by side) 29.0.14206865 in /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/licenses
+2026-07-12T12:11:31.7602593Z License for package NDK (Side by side) 29.0.14206865 accepted.
+2026-07-12T12:11:31.8523350Z Preparing "Install NDK (Side by side) 29.0.14206865 v.29.0.14206865".
+2026-07-12T12:11:45.5517995Z "Install NDK (Side by side) 29.0.14206865 v.29.0.14206865" ready.
+2026-07-12T12:11:45.5519820Z Installing NDK (Side by side) 29.0.14206865 in /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865
+2026-07-12T12:11:45.5522116Z "Install NDK (Side by side) 29.0.14206865 v.29.0.14206865" complete.
+2026-07-12T12:11:45.7533349Z "Install NDK (Side by side) 29.0.14206865 v.29.0.14206865" finished.
+2026-07-12T12:11:46.3523762Z Checking the license for package Android SDK Platform-Tools in /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/licenses
+2026-07-12T12:11:46.3532914Z License for package Android SDK Platform-Tools accepted.
+2026-07-12T12:11:46.3533753Z Preparing "Install Android SDK Platform-Tools v.37.0.0".
+2026-07-12T12:11:46.5529441Z "Install Android SDK Platform-Tools v.37.0.0" ready.
+2026-07-12T12:11:46.5583166Z Installing Android SDK Platform-Tools in /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/platform-tools
+2026-07-12T12:11:46.5599218Z "Install Android SDK Platform-Tools v.37.0.0" complete.
+2026-07-12T12:11:46.5612860Z "Install Android SDK Platform-Tools v.37.0.0" finished.
+2026-07-12T12:11:46.8516926Z 
+2026-07-12T12:11:46.8523137Z > Task :app:preBuild UP-TO-DATE
+2026-07-12T12:11:46.8523853Z > Task :app:preDebugBuild UP-TO-DATE
+2026-07-12T12:11:46.9542978Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+2026-07-12T12:11:47.0523668Z > Task :app:javaPreCompileDebug
+2026-07-12T12:11:48.1518277Z > Task :app:generateDebugResValues
+2026-07-12T12:11:48.2562860Z > Task :app:checkDebugAarMetadata
+2026-07-12T12:11:48.2592254Z > Task :app:mapDebugSourceSetPaths
+2026-07-12T12:11:48.2622196Z > Task :app:generateDebugResources
+2026-07-12T12:11:48.7542855Z > Task :app:packageDebugResources
+2026-07-12T12:11:49.0517633Z > Task :app:mergeDebugResources
+2026-07-12T12:11:49.2517891Z > Task :app:createDebugCompatibleScreenManifests
+2026-07-12T12:11:49.2535093Z > Task :app:extractDeepLinksDebug
+2026-07-12T12:11:49.2535869Z > Task :app:parseDebugLocalResources
+2026-07-12T12:11:49.3517145Z > Task :app:processDebugMainManifest
+2026-07-12T12:11:49.6517847Z > Task :app:processDebugManifest
+2026-07-12T12:11:49.6525571Z > Task :app:mergeDebugShaders
+2026-07-12T12:11:49.6546404Z > Task :app:processDebugManifestForPackage
+2026-07-12T12:11:50.0523563Z > Task :app:compileDebugShaders NO-SOURCE
+2026-07-12T12:11:50.0550632Z > Task :app:generateDebugAssets UP-TO-DATE
+2026-07-12T12:11:50.3545216Z > Task :app:mergeDebugAssets
+2026-07-12T12:11:50.3568816Z > Task :app:processDebugResources
+2026-07-12T12:11:50.8517673Z > Task :app:compressDebugAssets
+2026-07-12T12:11:53.0532875Z Note: Some input files use or override a deprecated API.
+2026-07-12T12:11:53.0533430Z 
+2026-07-12T12:11:53.0562434Z > Task :app:compileDebugJavaWithJavac
+2026-07-12T12:11:53.0603767Z Note: Recompile with -Xlint:deprecation for details.
+2026-07-12T12:11:53.6518232Z 
+2026-07-12T12:11:53.6533063Z > Task :app:processDebugJavaRes NO-SOURCE
+2026-07-12T12:11:53.9532936Z > Task :app:checkDebugDuplicateClasses
+2026-07-12T12:11:54.0517584Z > Task :app:desugarDebugFileDependencies
+2026-07-12T12:11:54.0542869Z > Task :app:mergeDebugJavaResource
+2026-07-12T12:12:06.2522813Z > Task :app:mergeLibDexDebug
+2026-07-12T12:12:06.8517835Z > Task :app:dexBuilderDebug
+2026-07-12T12:12:06.9582943Z > Task :app:mergeProjectDexDebug
+2026-07-12T12:12:07.8517878Z > Task :app:mergeExtDexDebug
+2026-07-12T12:12:08.0531190Z 
+2026-07-12T12:12:08.0573639Z > Task :app:configureCMakeDebug[armeabi-v7a] FAILED
+2026-07-12T12:12:08.0632825Z C/C++: CMake Error at /usr/local/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake:233 (message):
+2026-07-12T12:12:08.0662438Z C/C++:   Could NOT find MPV (missing: MPV_INCLUDE_DIR MPV_LIBRARY)
+2026-07-12T12:12:08.0693245Z C/C++: Call Stack (most recent call first):
+2026-07-12T12:12:08.0702783Z C/C++:   /usr/local/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake:603 (_FPHSA_FAILURE_MESSAGE)
+2026-07-12T12:12:08.0732607Z C/C++:   cmake/FindMPV.cmake:89 (find_package_handle_standard_args)
+2026-07-12T12:12:08.0744354Z C/C++:   CMakeLists.txt:159 (find_package)
+2026-07-12T12:12:08.1522343Z 
+2026-07-12T12:12:08.1542811Z FAILURE: Build failed with an exception.
+2026-07-12T12:12:08.1573589Z 
+2026-07-12T12:12:08.1602398Z * What went wrong:
+2026-07-12T12:12:08.1622608Z Execution failed for task ':app:configureCMakeDebug[armeabi-v7a]'.
+2026-07-12T12:12:08.1683677Z > [CXX1429] error when building with cmake using /home/runner/work/wiliwili/wiliwili/CMakeLists.txt: -- Building for Android: API=android-21, ABI=armeabi-v7a, STL=c++_shared
+2026-07-12T12:12:08.1752733Z   -- Build Type: Debug
+2026-07-12T12:12:08.1762741Z 26 actionable tasks: 26 executed
+2026-07-12T12:12:08.1812741Z   -- building for Android
+2026-07-12T12:12:08.1872463Z   -- USE_GLES2
+2026-07-12T12:12:08.1932275Z   -- SDL2
+2026-07-12T12:12:08.1992266Z   -- Using native GL
+2026-07-12T12:12:08.2052776Z   -- Found Git: /usr/bin/git (found version "2.54.0")
+2026-07-12T12:12:08.2112130Z   -- building from git tag: 201c7bb
+2026-07-12T12:12:08.2172097Z   -- building from git commit: 201c7bb
+2026-07-12T12:12:08.2202283Z   -- The C compiler identification is Clang 21.0.0
+2026-07-12T12:12:08.2212422Z   -- The CXX compiler identification is Clang 21.0.0
+2026-07-12T12:12:08.2242333Z   -- Detecting C compiler ABI info
+2026-07-12T12:12:08.2272423Z   -- Detecting C compiler ABI info - done
+2026-07-12T12:12:08.2274330Z   -- Check for working C compiler: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang - skipped
+2026-07-12T12:12:08.2302351Z   -- Detecting C compile features
+2026-07-12T12:12:08.2332396Z   -- Detecting C compile features - done
+2026-07-12T12:12:08.2362312Z   -- Detecting CXX compiler ABI info
+2026-07-12T12:12:08.2363087Z   -- Detecting CXX compiler ABI info - done
+2026-07-12T12:12:08.2393368Z   -- Check for working CXX compiler: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ - skipped
+2026-07-12T12:12:08.2422347Z   -- Detecting CXX compile features
+2026-07-12T12:12:08.2452334Z   -- Detecting CXX compile features - done
+2026-07-12T12:12:08.2453131Z   -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+2026-07-12T12:12:08.2482366Z   -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+2026-07-12T12:12:08.2512390Z   -- Looking for pthread_create in pthreads
+2026-07-12T12:12:08.2522309Z   -- Looking for pthread_create in pthreads - not found
+2026-07-12T12:12:08.2543242Z   -- Looking for pthread_create in pthread
+2026-07-12T12:12:08.2561005Z   -- Looking for pthread_create in pthread - not found
+2026-07-12T12:12:08.2561554Z   -- Check if compiler accepts -pthread
+2026-07-12T12:12:08.2562414Z   -- Check if compiler accepts -pthread - yes
+2026-07-12T12:12:08.2562882Z   -- Found Threads: TRUE
+2026-07-12T12:12:08.2563302Z   -- Configuring incomplete, errors occurred!
+2026-07-12T12:12:08.2563788Z   
+2026-07-12T12:12:08.2564166Z   C++ build system [configure] failed while executing:
+2026-07-12T12:12:08.2564653Z       /usr/local/bin/cmake \
+2026-07-12T12:12:08.2564979Z         -H/home/runner/work/wiliwili/wiliwili \
+2026-07-12T12:12:08.2565278Z         -DCMAKE_SYSTEM_NAME=Android \
+2026-07-12T12:12:08.2565548Z         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+2026-07-12T12:12:08.2565822Z         -DCMAKE_SYSTEM_VERSION=21 \
+2026-07-12T12:12:08.2566074Z         -DANDROID_PLATFORM=android-21 \
+2026-07-12T12:12:08.2566342Z         -DANDROID_ABI=armeabi-v7a \
+2026-07-12T12:12:08.2566597Z         -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a \
+2026-07-12T12:12:08.2567183Z         -DANDROID_NDK=/home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865 \
+2026-07-12T12:12:08.2568056Z         -DCMAKE_ANDROID_NDK=/home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865 \
+2026-07-12T12:12:08.2569074Z         -DCMAKE_TOOLCHAIN_FILE=/home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865/build/cmake/android.toolchain.cmake \
+2026-07-12T12:12:08.2569828Z         -DCMAKE_MAKE_PROGRAM=/usr/local/bin/ninja \
+2026-07-12T12:12:08.2570471Z         -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/runner/work/wiliwili/wiliwili/android/app/build/intermediates/cxx/Debug/2r3f3j5p/obj/armeabi-v7a \
+2026-07-12T12:12:08.2571430Z         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/home/runner/work/wiliwili/wiliwili/android/app/build/intermediates/cxx/Debug/2r3f3j5p/obj/armeabi-v7a \
+2026-07-12T12:12:08.2572552Z         -DCMAKE_BUILD_TYPE=Debug \
+2026-07-12T12:12:08.2573135Z         -B/home/runner/work/wiliwili/wiliwili/android/app/.cxx/Debug/2r3f3j5p/armeabi-v7a \
+2026-07-12T12:12:08.2573560Z         -GNinja \
+2026-07-12T12:12:08.2573761Z         -DPLATFORM_ANDROID=ON \
+2026-07-12T12:12:08.2574069Z         -DANDROID_STL=c++_shared \
+2026-07-12T12:12:08.2574308Z         -DUSE_SYSTEM_CURL=OFF \
+2026-07-12T12:12:08.2574775Z         -DUSE_SYSTEM_CPR=OFF \
+2026-07-12T12:12:08.2575237Z         -DWILIWILI_PREFIX=/home/runner/work/wiliwili/wiliwili/android/../scripts/android/buildscripts/prefix \
+2026-07-12T12:12:08.2575991Z         -DLIBROMFS_PREBUILT_GENERATOR=/home/runner/work/wiliwili/wiliwili/android/../library/borealis/libromfs-generator \
+2026-07-12T12:12:08.2576519Z         -DDISABLE_WEBP=ON
+2026-07-12T12:12:08.2576784Z     from /home/runner/work/wiliwili/wiliwili/android/app
+2026-07-12T12:12:08.2577305Z   CMake Error at /usr/local/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake:233 (message):
+2026-07-12T12:12:08.2577988Z     Could NOT find MPV (missing: MPV_INCLUDE_DIR MPV_LIBRARY)
+2026-07-12T12:12:08.2578308Z   Call Stack (most recent call first):
+2026-07-12T12:12:08.2578889Z     /usr/local/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake:603 (_FPHSA_FAILURE_MESSAGE)
+2026-07-12T12:12:08.2579430Z     cmake/FindMPV.cmake:89 (find_package_handle_standard_args)
+2026-07-12T12:12:08.2580165Z     CMakeLists.txt:159 (find_package) : com.android.ide.common.process.ProcessException: -- Building for Android: API=android-21, ABI=armeabi-v7a, STL=c++_shared
+2026-07-12T12:12:08.2580830Z   -- Build Type: Debug
+2026-07-12T12:12:08.2581043Z   -- building for Android
+2026-07-12T12:12:08.2581248Z   -- USE_GLES2
+2026-07-12T12:12:08.2581423Z   -- SDL2
+2026-07-12T12:12:08.2581592Z   -- Using native GL
+2026-07-12T12:12:08.2582042Z   -- Found Git: /usr/bin/git (found version "2.54.0")
+2026-07-12T12:12:08.2582347Z   -- building from git tag: 201c7bb
+2026-07-12T12:12:08.2582622Z   -- building from git commit: 201c7bb
+2026-07-12T12:12:08.2582906Z   -- The C compiler identification is Clang 21.0.0
+2026-07-12T12:12:08.2583227Z   -- The CXX compiler identification is Clang 21.0.0
+2026-07-12T12:12:08.2583525Z   -- Detecting C compiler ABI info
+2026-07-12T12:12:08.2583779Z   -- Detecting C compiler ABI info - done
+2026-07-12T12:12:08.2584585Z   -- Check for working C compiler: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang - skipped
+2026-07-12T12:12:08.2585395Z   -- Detecting C compile features
+2026-07-12T12:12:08.2585651Z   -- Detecting C compile features - done
+2026-07-12T12:12:08.2585925Z   -- Detecting CXX compiler ABI info
+2026-07-12T12:12:08.2586192Z   -- Detecting CXX compiler ABI info - done
+2026-07-12T12:12:08.2587011Z   -- Check for working CXX compiler: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ - skipped
+2026-07-12T12:12:08.2587831Z   -- Detecting CXX compile features
+2026-07-12T12:12:08.2588091Z   -- Detecting CXX compile features - done
+2026-07-12T12:12:08.2588377Z   -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+2026-07-12T12:12:08.2588688Z   -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+2026-07-12T12:12:08.2589000Z   -- Looking for pthread_create in pthreads
+2026-07-12T12:12:08.2589315Z   -- Looking for pthread_create in pthreads - not found
+2026-07-12T12:12:08.2589625Z   -- Looking for pthread_create in pthread
+2026-07-12T12:12:08.2589925Z   -- Looking for pthread_create in pthread - not found
+2026-07-12T12:12:08.2590224Z   -- Check if compiler accepts -pthread
+2026-07-12T12:12:08.2590503Z   -- Check if compiler accepts -pthread - yes
+2026-07-12T12:12:08.2590772Z   -- Found Threads: TRUE
+2026-07-12T12:12:08.2591006Z   -- Configuring incomplete, errors occurred!
+2026-07-12T12:12:08.2591259Z   
+2026-07-12T12:12:08.2591474Z   C++ build system [configure] failed while executing:
+2026-07-12T12:12:08.2591952Z       /usr/local/bin/cmake \
+2026-07-12T12:12:08.2592206Z         -H/home/runner/work/wiliwili/wiliwili \
+2026-07-12T12:12:08.2592501Z         -DCMAKE_SYSTEM_NAME=Android \
+2026-07-12T12:12:08.2592765Z         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+2026-07-12T12:12:08.2593030Z         -DCMAKE_SYSTEM_VERSION=21 \
+2026-07-12T12:12:08.2593277Z         -DANDROID_PLATFORM=android-21 \
+2026-07-12T12:12:08.2593625Z         -DANDROID_ABI=armeabi-v7a \
+2026-07-12T12:12:08.2593888Z         -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a \
+2026-07-12T12:12:08.2594466Z         -DANDROID_NDK=/home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865 \
+2026-07-12T12:12:08.2595325Z         -DCMAKE_ANDROID_NDK=/home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865 \
+2026-07-12T12:12:08.2596344Z         -DCMAKE_TOOLCHAIN_FILE=/home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865/build/cmake/android.toolchain.cmake \
+2026-07-12T12:12:08.2597207Z         -DCMAKE_MAKE_PROGRAM=/usr/local/bin/ninja \
+2026-07-12T12:12:08.2597901Z         -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/runner/work/wiliwili/wiliwili/android/app/build/intermediates/cxx/Debug/2r3f3j5p/obj/armeabi-v7a \
+2026-07-12T12:12:08.2598846Z         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/home/runner/work/wiliwili/wiliwili/android/app/build/intermediates/cxx/Debug/2r3f3j5p/obj/armeabi-v7a \
+2026-07-12T12:12:08.2599455Z         -DCMAKE_BUILD_TYPE=Debug \
+2026-07-12T12:12:08.2599853Z         -B/home/runner/work/wiliwili/wiliwili/android/app/.cxx/Debug/2r3f3j5p/armeabi-v7a \
+2026-07-12T12:12:08.2600258Z         -GNinja \
+2026-07-12T12:12:08.2600463Z         -DPLATFORM_ANDROID=ON \
+2026-07-12T12:12:08.2600704Z         -DANDROID_STL=c++_shared \
+2026-07-12T12:12:08.2600940Z         -DUSE_SYSTEM_CURL=OFF \
+2026-07-12T12:12:08.2601166Z         -DUSE_SYSTEM_CPR=OFF \
+2026-07-12T12:12:08.2601635Z         -DWILIWILI_PREFIX=/home/runner/work/wiliwili/wiliwili/android/../scripts/android/buildscripts/prefix \
+2026-07-12T12:12:08.2602640Z         -DLIBROMFS_PREBUILT_GENERATOR=/home/runner/work/wiliwili/wiliwili/android/../library/borealis/libromfs-generator \
+2026-07-12T12:12:08.2603173Z         -DDISABLE_WEBP=ON
+2026-07-12T12:12:08.2603456Z     from /home/runner/work/wiliwili/wiliwili/android/app
+2026-07-12T12:12:08.2603988Z   CMake Error at /usr/local/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake:233 (message):
+2026-07-12T12:12:08.2604527Z     Could NOT find MPV (missing: MPV_INCLUDE_DIR MPV_LIBRARY)
+2026-07-12T12:12:08.2604855Z   Call Stack (most recent call first):
+2026-07-12T12:12:08.2605324Z     /usr/local/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake:603 (_FPHSA_FAILURE_MESSAGE)
+2026-07-12T12:12:08.2605867Z     cmake/FindMPV.cmake:89 (find_package_handle_standard_args)
+2026-07-12T12:12:08.2606195Z     CMakeLists.txt:159 (find_package)
+2026-07-12T12:12:08.2606680Z   	at com.android.build.gradle.internal.cxx.process.ExecuteProcessKt.execute(ExecuteProcess.kt:288)
+2026-07-12T12:12:08.2607476Z   	at com.android.build.gradle.internal.cxx.process.ExecuteProcessKt$executeProcess$1.invoke(ExecuteProcess.kt:108)
+2026-07-12T12:12:08.2608305Z   	at com.android.build.gradle.internal.cxx.process.ExecuteProcessKt$executeProcess$1.invoke(ExecuteProcess.kt:106)
+2026-07-12T12:12:08.2609075Z   	at com.android.build.gradle.internal.cxx.timing.TimingEnvironmentKt.time(TimingEnvironment.kt:32)
+2026-07-12T12:12:08.2609838Z   	at com.android.build.gradle.internal.cxx.process.ExecuteProcessKt.executeProcess(ExecuteProcess.kt:106)
+2026-07-12T12:12:08.2610652Z   	at com.android.build.gradle.internal.cxx.process.ExecuteProcessKt.executeProcess$default(ExecuteProcess.kt:85)
+2026-07-12T12:12:08.2611504Z   	at com.android.build.gradle.tasks.CmakeQueryMetadataGenerator.executeProcess(CmakeFileApiMetadataGenerator.kt:59)
+2026-07-12T12:12:08.2613227Z   	at com.android.build.gradle.tasks.ExternalNativeJsonGenerator$configureOneAbi$1$1$3.invoke(ExternalNativeJsonGenerator.kt:247)
+2026-07-12T12:12:08.2614182Z   	at com.android.build.gradle.tasks.ExternalNativeJsonGenerator$configureOneAbi$1$1$3.invoke(ExternalNativeJsonGenerator.kt:247)
+2026-07-12T12:12:08.2615013Z   	at com.android.build.gradle.internal.cxx.timing.TimingEnvironmentKt.time(TimingEnvironment.kt:32)
+2026-07-12T12:12:08.2615810Z   	at com.android.build.gradle.tasks.ExternalNativeJsonGenerator.configureOneAbi(ExternalNativeJsonGenerator.kt:247)
+2026-07-12T12:12:08.2616746Z   	at com.android.build.gradle.tasks.ExternalNativeJsonGenerator.configure(ExternalNativeJsonGenerator.kt:113)
+2026-07-12T12:12:08.2617568Z   	at com.android.build.gradle.tasks.ExternalNativeBuildJsonTask.doTaskAction(ExternalNativeBuildJsonTask.kt:89)
+2026-07-12T12:12:08.2618422Z   	at com.android.build.gradle.internal.tasks.UnsafeOutputsTask$taskAction$$inlined$recordTaskAction$1.invoke(BaseTask.kt:78)
+2026-07-12T12:12:08.2619139Z   	at com.android.build.gradle.internal.tasks.Blocks.recordSpan(Blocks.java:51)
+2026-07-12T12:12:08.2619910Z   	at com.android.build.gradle.internal.tasks.UnsafeOutputsTask.taskAction(UnsafeOutputsTask.kt:81)
+2026-07-12T12:12:08.2620622Z   	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+2026-07-12T12:12:08.2621270Z   	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+2026-07-12T12:12:08.2622329Z   	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+2026-07-12T12:12:08.2622945Z   	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+2026-07-12T12:12:08.2623393Z   	at org.gradle.internal.reflect.JavaMethod.invoke(JavaMethod.java:125)
+2026-07-12T12:12:08.2624033Z   	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.doExecute(StandardTaskAction.java:58)
+2026-07-12T12:12:08.2624807Z   	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:51)
+2026-07-12T12:12:08.2625568Z   	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:29)
+2026-07-12T12:12:08.2626249Z   	at org.gradle.api.internal.tasks.execution.TaskExecution$3.run(TaskExecution.java:244)
+2026-07-12T12:12:08.2626966Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
+2026-07-12T12:12:08.2627776Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
+2026-07-12T12:12:08.2628581Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+2026-07-12T12:12:08.2629379Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+2026-07-12T12:12:08.2630189Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+2026-07-12T12:12:08.2631011Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+2026-07-12T12:12:08.2631996Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
+2026-07-12T12:12:08.2632742Z   	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:229)
+2026-07-12T12:12:08.2633443Z   	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:212)
+2026-07-12T12:12:08.2634239Z   	at org.gradle.api.internal.tasks.execution.TaskExecution.executeWithPreviousOutputFiles(TaskExecution.java:195)
+2026-07-12T12:12:08.2634993Z   	at org.gradle.api.internal.tasks.execution.TaskExecution.execute(TaskExecution.java:162)
+2026-07-12T12:12:08.2635640Z   	at org.gradle.internal.execution.steps.ExecuteStep.executeInternal(ExecuteStep.java:105)
+2026-07-12T12:12:08.2636257Z   	at org.gradle.internal.execution.steps.ExecuteStep.access$000(ExecuteStep.java:44)
+2026-07-12T12:12:08.2636829Z   	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:59)
+2026-07-12T12:12:08.2637381Z   	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:56)
+2026-07-12T12:12:08.2638185Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+2026-07-12T12:12:08.2639233Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+2026-07-12T12:12:08.2640237Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+2026-07-12T12:12:08.2641039Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+2026-07-12T12:12:08.2642109Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+2026-07-12T12:12:08.2642933Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+2026-07-12T12:12:08.2643888Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+2026-07-12T12:12:08.2644640Z   	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:56)
+2026-07-12T12:12:08.2645210Z   	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:44)
+2026-07-12T12:12:08.2645845Z   	at org.gradle.internal.execution.steps.CancelExecutionStep.execute(CancelExecutionStep.java:42)
+2026-07-12T12:12:08.2646553Z   	at org.gradle.internal.execution.steps.TimeoutStep.executeWithoutTimeout(TimeoutStep.java:75)
+2026-07-12T12:12:08.2647186Z   	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
+2026-07-12T12:12:08.2647887Z   	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:50)
+2026-07-12T12:12:08.2648735Z   	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:28)
+2026-07-12T12:12:08.2649571Z   	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:67)
+2026-07-12T12:12:08.2650389Z   	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:37)
+2026-07-12T12:12:08.2651242Z   	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:61)
+2026-07-12T12:12:08.2652368Z   	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:26)
+2026-07-12T12:12:08.2653291Z   	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:69)
+2026-07-12T12:12:08.2654457Z   	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:46)
+2026-07-12T12:12:08.2655331Z   	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:40)
+2026-07-12T12:12:08.2656121Z   	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:29)
+2026-07-12T12:12:08.2656915Z   	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:189)
+2026-07-12T12:12:08.2657625Z   	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$1(BuildCacheStep.java:75)
+2026-07-12T12:12:08.2658165Z   	at org.gradle.internal.Either$Right.fold(Either.java:175)
+2026-07-12T12:12:08.2658650Z   	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
+2026-07-12T12:12:08.2659250Z   	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:73)
+2026-07-12T12:12:08.2659866Z   	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:48)
+2026-07-12T12:12:08.2660560Z   	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:46)
+2026-07-12T12:12:08.2661340Z   	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:35)
+2026-07-12T12:12:08.2662360Z   	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:75)
+2026-07-12T12:12:08.2663099Z   	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:53)
+2026-07-12T12:12:08.2663682Z   	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+2026-07-12T12:12:08.2664348Z   	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:53)
+2026-07-12T12:12:08.2665001Z   	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:35)
+2026-07-12T12:12:08.2665856Z   	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
+2026-07-12T12:12:08.2666917Z   	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
+2026-07-12T12:12:08.2668096Z   	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:49)
+2026-07-12T12:12:08.2669216Z   	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:27)
+2026-07-12T12:12:08.2670217Z   	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:71)
+2026-07-12T12:12:08.2671152Z   	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:39)
+2026-07-12T12:12:08.2672268Z   	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:65)
+2026-07-12T12:12:08.2672956Z   	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:36)
+2026-07-12T12:12:08.2673593Z   	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:105)
+2026-07-12T12:12:08.2674191Z   	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:54)
+2026-07-12T12:12:08.2675028Z   	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:64)
+2026-07-12T12:12:08.2676111Z   	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:43)
+2026-07-12T12:12:08.2677170Z   	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:125)
+2026-07-12T12:12:08.2678105Z   	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:56)
+2026-07-12T12:12:08.2678938Z   	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:36)
+2026-07-12T12:12:08.2679876Z   	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+2026-07-12T12:12:08.2680865Z   	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+2026-07-12T12:12:08.2681985Z   	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+2026-07-12T12:12:08.2682837Z   	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+2026-07-12T12:12:08.2683602Z   	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+2026-07-12T12:12:08.2684431Z   	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+2026-07-12T12:12:08.2685223Z   	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:289)
+2026-07-12T12:12:08.2685990Z   	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+2026-07-12T12:12:08.2686827Z   	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+2026-07-12T12:12:08.2687592Z   	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+2026-07-12T12:12:08.2688282Z   	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+2026-07-12T12:12:08.2689165Z   	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+2026-07-12T12:12:08.2690098Z   	at java.base/java.util.Optional.orElseGet(Optional.java:364)
+2026-07-12T12:12:08.2690805Z   	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+2026-07-12T12:12:08.2692034Z   	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+2026-07-12T12:12:08.2692895Z   	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+2026-07-12T12:12:08.2693692Z   	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+2026-07-12T12:12:08.2694374Z   	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:48)
+2026-07-12T12:12:08.2694960Z   	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:35)
+2026-07-12T12:12:08.2695631Z   	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:61)
+2026-07-12T12:12:08.2696492Z   	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:127)
+2026-07-12T12:12:08.2697402Z   	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:116)
+2026-07-12T12:12:08.2698318Z   	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+2026-07-12T12:12:08.2699286Z   	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+2026-07-12T12:12:08.2700241Z   	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+2026-07-12T12:12:08.2701114Z   	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+2026-07-12T12:12:08.2702089Z   	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+2026-07-12T12:12:08.2702942Z   	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+2026-07-12T12:12:08.2703752Z   	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+2026-07-12T12:12:08.2704533Z   	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+2026-07-12T12:12:08.2705460Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+2026-07-12T12:12:08.2706503Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+2026-07-12T12:12:08.2707430Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+2026-07-12T12:12:08.2708235Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+2026-07-12T12:12:08.2709043Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+2026-07-12T12:12:08.2709859Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+2026-07-12T12:12:08.2710654Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+2026-07-12T12:12:08.2711453Z   	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+2026-07-12T12:12:08.2712313Z   	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+2026-07-12T12:12:08.2713139Z   	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+2026-07-12T12:12:08.2714113Z   	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+2026-07-12T12:12:08.2715307Z   	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+2026-07-12T12:12:08.2716245Z   	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+2026-07-12T12:12:08.2717145Z   	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+2026-07-12T12:12:08.2718313Z   	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+2026-07-12T12:12:08.2719270Z   	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+2026-07-12T12:12:08.2719989Z   	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+2026-07-12T12:12:08.2720656Z   	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
+2026-07-12T12:12:08.2721426Z   	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:138)
+2026-07-12T12:12:08.2722773Z   	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:123)
+2026-07-12T12:12:08.2723540Z   	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+2026-07-12T12:12:08.2724265Z   	at org.gradle.execution.DryRunBuildExecutionAction.execute(DryRunBuildExecutionAction.java:51)
+2026-07-12T12:12:08.2725116Z   	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+2026-07-12T12:12:08.2726115Z   	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+2026-07-12T12:12:08.2727137Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+2026-07-12T12:12:08.2728200Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+2026-07-12T12:12:08.2729124Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+2026-07-12T12:12:08.2729935Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+2026-07-12T12:12:08.2730755Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+2026-07-12T12:12:08.2731570Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+2026-07-12T12:12:08.2732642Z   	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+2026-07-12T12:12:08.2733530Z   	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+2026-07-12T12:12:08.2734487Z   	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
+2026-07-12T12:12:08.2735352Z   	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+2026-07-12T12:12:08.2736159Z   	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
+2026-07-12T12:12:08.2736896Z   	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:44)
+2026-07-12T12:12:08.2737597Z   	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
+2026-07-12T12:12:08.2738442Z   	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
+2026-07-12T12:12:08.2739389Z   	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
+2026-07-12T12:12:08.2740377Z   	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:267)
+2026-07-12T12:12:08.2741158Z   	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:131)
+2026-07-12T12:12:08.2742058Z   	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
+2026-07-12T12:12:08.2742771Z   	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
+2026-07-12T12:12:08.2743684Z   	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
+2026-07-12T12:12:08.2744536Z   	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+2026-07-12T12:12:08.2745309Z   	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
+2026-07-12T12:12:08.2745997Z   	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+2026-07-12T12:12:08.2746518Z   	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+2026-07-12T12:12:08.2747131Z   	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+2026-07-12T12:12:08.2747862Z   	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+2026-07-12T12:12:08.2748561Z   	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+2026-07-12T12:12:08.2749210Z   	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+2026-07-12T12:12:08.2749710Z   	at java.base/java.lang.Thread.run(Thread.java:840)
+2026-07-12T12:12:08.2755393Z   Caused by: com.android.ide.common.process.ProcessException: Error while executing process /usr/local/bin/cmake with arguments {-H/home/runner/work/wiliwili/wiliwili -DCMAKE_SYSTEM_NAME=Android -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_SYSTEM_VERSION=21 -DANDROID_PLATFORM=android-21 -DANDROID_ABI=armeabi-v7a -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DANDROID_NDK=/home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865 -DCMAKE_ANDROID_NDK=/home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865 -DCMAKE_TOOLCHAIN_FILE=/home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux/ndk/29.0.14206865/build/cmake/android.toolchain.cmake -DCMAKE_MAKE_PROGRAM=/usr/local/bin/ninja -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/runner/work/wiliwili/wiliwili/android/app/build/intermediates/cxx/Debug/2r3f3j5p/obj/armeabi-v7a -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/home/runner/work/wiliwili/wiliwili/android/app/build/intermediates/cxx/Debug/2r3f3j5p/obj/armeabi-v7a -DCMAKE_BUILD_TYPE=Debug -B/home/runner/work/wiliwili/wiliwili/android/app/.cxx/Debug/2r3f3j5p/armeabi-v7a -GNinja -DPLATFORM_ANDROID=ON -DANDROID_STL=c++_shared -DUSE_SYSTEM_CURL=OFF -DUSE_SYSTEM_CPR=OFF -DWILIWILI_PREFIX=/home/runner/work/wiliwili/wiliwili/android/../scripts/android/buildscripts/prefix -DLIBROMFS_PREBUILT_GENERATOR=/home/runner/work/wiliwili/wiliwili/android/../library/borealis/libromfs-generator -DDISABLE_WEBP=ON}
+2026-07-12T12:12:08.2761257Z   	at com.android.build.gradle.internal.process.GradleProcessResult.buildProcessException(GradleProcessResult.java:73)
+2026-07-12T12:12:08.2762274Z   	at com.android.build.gradle.internal.process.GradleProcessResult.assertNormalExitValue(GradleProcessResult.java:48)
+2026-07-12T12:12:08.2763090Z   	at com.android.build.gradle.internal.cxx.process.ExecuteProcessKt.execute(ExecuteProcess.kt:277)
+2026-07-12T12:12:08.2763576Z   	... 172 more
+2026-07-12T12:12:08.2764081Z   Caused by: org.gradle.process.internal.ExecException: Process 'command '/usr/local/bin/cmake'' finished with non-zero exit value 1
+2026-07-12T12:12:08.2764938Z   	at org.gradle.process.internal.DefaultExecHandle$ExecResultImpl.assertNormalExitValue(DefaultExecHandle.java:442)
+2026-07-12T12:12:08.2765889Z   	at com.android.build.gradle.internal.process.GradleProcessResult.assertNormalExitValue(GradleProcessResult.java:46)
+2026-07-12T12:12:08.2766453Z   	... 173 more
+2026-07-12T12:12:08.2766566Z 
+2026-07-12T12:12:08.2766572Z 
+2026-07-12T12:12:08.2766640Z * Try:
+2026-07-12T12:12:08.2766862Z > Run with --stacktrace option to get the stack trace.
+2026-07-12T12:12:08.2767221Z > Run with --info or --debug option to get more log output.
+2026-07-12T12:12:08.2767653Z > Run with --scan to get full insights.
+2026-07-12T12:12:08.2767940Z > Get more help at https://help.gradle.org.
+2026-07-12T12:12:08.2768136Z 
+2026-07-12T12:12:08.2768272Z BUILD FAILED in 1m 4s
+2026-07-12T12:12:08.5829656Z ##[error]Process completed with exit code 1.

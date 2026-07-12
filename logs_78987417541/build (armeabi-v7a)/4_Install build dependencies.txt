@@ -1,0 +1,124 @@
+﻿2026-07-12T12:05:19.1666284Z ##[group]Run sudo apt-get update
+2026-07-12T12:05:19.1666682Z [36;1msudo apt-get update[0m
+2026-07-12T12:05:19.1667147Z [36;1msudo apt-get install -y autoconf pkg-config libtool ninja-build nasm yasm unzip wget gperf[0m
+2026-07-12T12:05:19.1667811Z [36;1m# recent meson (mpv/libplacebo master require >= 1.0; Ubuntu 22.04 ships 0.61)[0m
+2026-07-12T12:05:19.1668238Z [36;1mpip3 install meson[0m
+2026-07-12T12:05:19.1912356Z shell: /usr/bin/bash -e {0}
+2026-07-12T12:05:19.1912679Z env:
+2026-07-12T12:05:19.1913115Z   ANDROID_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:05:19.1913847Z   ANDROID_SDK_ROOT: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-sdk-linux
+2026-07-12T12:05:19.1914556Z   ANDROID_NDK_HOME: /home/runner/work/wiliwili/wiliwili/scripts/android/buildscripts/sdk/android-ndk-r29
+2026-07-12T12:05:19.1915127Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:05:19.1915676Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+2026-07-12T12:05:19.1916042Z ##[endgroup]
+2026-07-12T12:05:19.3343402Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-07-12T12:05:19.3832600Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-07-12T12:05:19.3849398Z Get:6 https://packages.microsoft.com/repos/azure-cli noble InRelease [3564 B]
+2026-07-12T12:05:19.3912106Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2026-07-12T12:05:19.3930073Z Get:8 https://dl.google.com/linux/chrome-stable/deb stable InRelease [1825 B]
+2026-07-12T12:05:19.3981699Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-07-12T12:05:19.4032581Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-07-12T12:05:19.4096626Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-07-12T12:05:19.5790711Z Get:9 https://packages.microsoft.com/repos/azure-cli noble/main amd64 Packages [2314 B]
+2026-07-12T12:05:19.6289672Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [214 kB]
+2026-07-12T12:05:19.6338546Z Get:11 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [11.6 kB]
+2026-07-12T12:05:19.6363154Z Get:12 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [181 kB]
+2026-07-12T12:05:19.6956956Z Get:13 https://dl.google.com/linux/chrome-stable/deb stable/main amd64 Packages [1216 B]
+2026-07-12T12:05:19.7287169Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1092 kB]
+2026-07-12T12:05:19.7357424Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [269 kB]
+2026-07-12T12:05:19.7402745Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [181 kB]
+2026-07-12T12:05:19.7423022Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1660 kB]
+2026-07-12T12:05:19.7506740Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [327 kB]
+2026-07-12T12:05:19.7543195Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [388 kB]
+2026-07-12T12:05:19.7571629Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1225 kB]
+2026-07-12T12:05:19.7653353Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [276 kB]
+2026-07-12T12:05:19.7676281Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+2026-07-12T12:05:19.7814182Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [5744 B]
+2026-07-12T12:05:19.8278137Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [10.5 kB]
+2026-07-12T12:05:19.8400199Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [827 kB]
+2026-07-12T12:05:19.8422494Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [187 kB]
+2026-07-12T12:05:19.8448944Z Get:27 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Components [44.8 kB]
+2026-07-12T12:05:19.8468241Z Get:28 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 c-n-f Metadata [11.9 kB]
+2026-07-12T12:05:19.8512877Z Get:29 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1174 kB]
+2026-07-12T12:05:19.8562827Z Get:30 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [231 kB]
+2026-07-12T12:05:19.8583392Z Get:31 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Components [76.3 kB]
+2026-07-12T12:05:19.8602122Z Get:32 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 c-n-f Metadata [24.2 kB]
+2026-07-12T12:05:27.3246354Z Fetched 8808 kB in 1s (7107 kB/s)
+2026-07-12T12:05:28.0327770Z Reading package lists...
+2026-07-12T12:05:28.0644753Z Reading package lists...
+2026-07-12T12:05:28.2372777Z Building dependency tree...
+2026-07-12T12:05:28.2380852Z Reading state information...
+2026-07-12T12:05:28.4230253Z autoconf is already the newest version (2.71-3).
+2026-07-12T12:05:28.4231119Z pkg-config is already the newest version (1.8.1-2build1).
+2026-07-12T12:05:28.4232490Z libtool is already the newest version (2.4.7-7build1).
+2026-07-12T12:05:28.4233231Z unzip is already the newest version (6.0-28ubuntu4.1).
+2026-07-12T12:05:28.4233971Z wget is already the newest version (1.21.4-1ubuntu4.1).
+2026-07-12T12:05:28.4234658Z The following NEW packages will be installed:
+2026-07-12T12:05:28.4238689Z   gperf nasm ninja-build yasm
+2026-07-12T12:05:28.4414011Z 0 upgraded, 4 newly installed, 0 to remove and 38 not upgraded.
+2026-07-12T12:05:28.4414728Z Need to get 1174 kB of archives.
+2026-07-12T12:05:28.4415334Z After this operation, 6191 kB of additional disk space will be used.
+2026-07-12T12:05:28.4416042Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-07-12T12:05:28.4681918Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 gperf amd64 3.1-1build1 [103 kB]
+2026-07-12T12:05:28.4786956Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 nasm amd64 2.16.01-1build1 [459 kB]
+2026-07-12T12:05:28.4933196Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 ninja-build amd64 1.11.1-2 [129 kB]
+2026-07-12T12:05:28.5027731Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 yasm amd64 1.3.0-4 [483 kB]
+2026-07-12T12:05:28.7718105Z Fetched 1174 kB in 0s (15.6 MB/s)
+2026-07-12T12:05:28.8005295Z Selecting previously unselected package gperf.
+2026-07-12T12:05:29.3156513Z (Reading database ... 
+2026-07-12T12:05:29.3157097Z (Reading database ... 5%
+2026-07-12T12:05:29.3157554Z (Reading database ... 10%
+2026-07-12T12:05:29.3158023Z (Reading database ... 15%
+2026-07-12T12:05:29.3158444Z (Reading database ... 20%
+2026-07-12T12:05:29.3158854Z (Reading database ... 25%
+2026-07-12T12:05:29.3159268Z (Reading database ... 30%
+2026-07-12T12:05:29.3159677Z (Reading database ... 35%
+2026-07-12T12:05:29.3160115Z (Reading database ... 40%
+2026-07-12T12:05:29.3160518Z (Reading database ... 45%
+2026-07-12T12:05:29.3160858Z (Reading database ... 50%
+2026-07-12T12:05:29.3754788Z (Reading database ... 55%
+2026-07-12T12:05:29.8595275Z (Reading database ... 60%
+2026-07-12T12:05:30.1133017Z (Reading database ... 65%
+2026-07-12T12:05:30.4142218Z (Reading database ... 70%
+2026-07-12T12:05:30.5525057Z (Reading database ... 75%
+2026-07-12T12:05:30.9423291Z (Reading database ... 80%
+2026-07-12T12:05:31.5542246Z (Reading database ... 85%
+2026-07-12T12:05:32.1197710Z (Reading database ... 90%
+2026-07-12T12:05:32.7179081Z (Reading database ... 95%
+2026-07-12T12:05:32.7179582Z (Reading database ... 100%
+2026-07-12T12:05:32.7180146Z (Reading database ... 202701 files and directories currently installed.)
+2026-07-12T12:05:32.7224617Z Preparing to unpack .../gperf_3.1-1build1_amd64.deb ...
+2026-07-12T12:05:32.7280800Z Unpacking gperf (3.1-1build1) ...
+2026-07-12T12:05:32.7932120Z Selecting previously unselected package nasm.
+2026-07-12T12:05:32.8058156Z Preparing to unpack .../nasm_2.16.01-1build1_amd64.deb ...
+2026-07-12T12:05:32.8081595Z Unpacking nasm (2.16.01-1build1) ...
+2026-07-12T12:05:32.8616304Z Selecting previously unselected package ninja-build.
+2026-07-12T12:05:32.8742138Z Preparing to unpack .../ninja-build_1.11.1-2_amd64.deb ...
+2026-07-12T12:05:32.8757563Z Unpacking ninja-build (1.11.1-2) ...
+2026-07-12T12:05:32.9283175Z Selecting previously unselected package yasm.
+2026-07-12T12:05:32.9408266Z Preparing to unpack .../yasm_1.3.0-4_amd64.deb ...
+2026-07-12T12:05:32.9421638Z Unpacking yasm (1.3.0-4) ...
+2026-07-12T12:05:33.0113617Z Setting up gperf (3.1-1build1) ...
+2026-07-12T12:05:33.0165100Z Setting up ninja-build (1.11.1-2) ...
+2026-07-12T12:05:33.0206549Z Setting up yasm (1.3.0-4) ...
+2026-07-12T12:05:33.0251218Z Setting up nasm (2.16.01-1build1) ...
+2026-07-12T12:05:33.0296960Z Processing triggers for man-db (2.12.0-4build2) ...
+2026-07-12T12:05:33.0329093Z Not building database; man-db/auto-update is not 'true'.
+2026-07-12T12:05:33.0350091Z Processing triggers for install-info (7.1-3build2) ...
+2026-07-12T12:05:34.3270537Z 
+2026-07-12T12:05:34.3271173Z Running kernel seems to be up-to-date.
+2026-07-12T12:05:34.3271572Z 
+2026-07-12T12:05:34.3272574Z No services need to be restarted.
+2026-07-12T12:05:34.3272889Z 
+2026-07-12T12:05:34.3273060Z No containers need to be restarted.
+2026-07-12T12:05:34.3273350Z 
+2026-07-12T12:05:34.3273552Z No user sessions are running outdated binaries.
+2026-07-12T12:05:34.3273900Z 
+2026-07-12T12:05:34.3274238Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-07-12T12:05:36.4586894Z Defaulting to user installation because normal site-packages is not writeable
+2026-07-12T12:05:37.5506922Z Collecting meson
+2026-07-12T12:05:37.5965855Z   Downloading meson-1.11.2-py3-none-any.whl.metadata (1.8 kB)
+2026-07-12T12:05:37.6131706Z Downloading meson-1.11.2-py3-none-any.whl (1.1 MB)
+2026-07-12T12:05:37.6484879Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 33.3 MB/s eta 0:00:00
+2026-07-12T12:05:37.9372773Z Installing collected packages: meson
+2026-07-12T12:05:38.6865210Z Successfully installed meson-1.11.2
