@@ -249,6 +249,15 @@ if (PLATFORM_ANDROID)
     # (borealis android-project does add_subdirectory(SDL) before borealis.)
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     add_subdirectory(${BOREALIS_LIBRARY}/lib/extern/SDL EXCLUDE_FROM_ALL)
+    # SDL 2.28.5 still calls ALooper_pollAll, which NDK r24+ marks as
+    # __attribute__((unavailable)) → hard compile error. Downgrade it so the
+    # old SDL source compiles cleanly under the buildscripts NDK (r29).
+    foreach(_t SDL2 SDL2-static)
+        if(TARGET ${_t})
+            target_compile_options(${_t} PRIVATE -Wno-error=unavailable -Wno-unavailable)
+        endif()
+    endforeach()
+    unset(_t)
 endif ()
 add_subdirectory(library)
 
