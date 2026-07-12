@@ -22,8 +22,14 @@ else ()
     elseif (PLATFORM_IOS)
         set(CPR_USE_SYSTEM_CURL OFF)
         set(CPR_SKIP_CA_BUNDLE_SEARCH ON)
-    elseif (PLATFORM_SWITCH OR PLATFORM_PS4 OR PLATFORM_PSV OR PLATFORM_ANDROID)
+    elseif (PLATFORM_SWITCH OR PLATFORM_PS4 OR PLATFORM_PSV)
         set(CPR_USE_SYSTEM_CURL ON)
+        set(CPR_FORCE_MBEDTLS_BACKEND ON)
+    elseif (PLATFORM_ANDROID)
+        # buildscripts does not build libcurl for Android, so use cpr's
+        # built-in curl (FetchContent downloads curl 8.4.0) with the
+        # MbedTLS backend (built by buildscripts and installed to prefix).
+        set(CPR_USE_SYSTEM_CURL OFF)
         set(CPR_FORCE_MBEDTLS_BACKEND ON)
     endif ()
     add_subdirectory(cpr EXCLUDE_FROM_ALL)
