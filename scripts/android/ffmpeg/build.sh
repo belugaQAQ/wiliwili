@@ -42,11 +42,19 @@ AR=${TOOLCHAIN}/bin/llvm-ar
 NM=${TOOLCHAIN}/bin/llvm-nm
 RANLIB=${TOOLCHAIN}/bin/llvm-ranlib
 STRIP=${TOOLCHAIN}/bin/llvm-strip
-LD=${TOOLCHAIN}/bin/ld.lld
+# Let clang invoke lld itself; passing ld.lld directly confuses FFmpeg configure
+LD=${CC}
+
+# armeabi-v7a needs -march to avoid clang emitting incompatible instructions
+EXTRA_CFLAGS=""
+if [ "$ABI" = "armeabi-v7a" ]; then
+    EXTRA_CFLAGS="-march=armv7-a -mfpu=neon -mfloat-abi=softfp"
+fi
 
 echo "Building FFmpeg for Android ${ABI}..."
 echo "CC=${CC}"
 echo "AR=${AR}"
+echo "EXTRA_CFLAGS=${EXTRA_CFLAGS}"
 
 if [ ! -d "$SOURCE_DIR" ]; then
     git clone --depth 1 --branch n7.1 https://github.com/FFmpeg/FFmpeg.git "$SOURCE_DIR"
@@ -66,6 +74,7 @@ cd "$SOURCE_DIR"
     --target-os=android \
     --arch=${ARCH} \
     --sysroot=${TOOLCHAIN}/sysroot \
+    --extra-cflags="${EXTRA_CFLAGS}" \
     --enable-gpl \
     --enable-version3 \
     --enable-shared \
