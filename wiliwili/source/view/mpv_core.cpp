@@ -177,6 +177,8 @@ static void *get_proc_address(void *unused, const char *name) {
 #ifdef __SDL2__
     SDL_GL_GetCurrentContext();
     return (void *)SDL_GL_GetProcAddress(name);
+#elif defined(__ANDROID__)
+    return (void *)eglGetProcAddress(name);
 #else
     glfwGetCurrentContext();
     return (void *)glfwGetProcAddress(name);
@@ -488,6 +490,7 @@ void MPVCore::init() {
 #if defined(GLFW_EXPOSE_NATIVE_WAYLAND)
                               {MPV_RENDER_PARAM_WL_DISPLAY, glfwGetWaylandDisplay()},
 #endif
+                              // Android EGL: no additional display params needed, EGL context is already current
                               {MPV_RENDER_PARAM_INVALID, nullptr}};
 #endif
 

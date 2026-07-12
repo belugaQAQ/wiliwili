@@ -1,0 +1,71 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'resources/i18n/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        abi: [ arm64-v8a, armeabi-v7a ]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK
+        run: sdkmanager "ndk;26.1.10909125"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build nasm yasm python3-pip
+
+      - name: Build FFmpeg
+        run: bash scripts/android/ffmpeg/build.sh ${{ matrix.abi }}
+        env:
+          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk
+
+      - name: Build libmpv
+        run: bash scripts/android/mpv/build.sh ${{ matrix.abi }}
+        env:
+          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk
+
+      - name: Copy native libraries
+        run: |
+          mkdir -p android/app/libs/${{ matrix.abi }}
+          cp scripts/android/mpv/build/${{ matrix.abi }}/lib/libmpv.so android/app/libs/${{ matrix.abi }}/
+          cp scripts/android/ffmpeg/build/${{ matrix.abi }}/lib/*.so android/app/libs/${{ matrix.abi }}/ 2>/dev/null || true
+
+      - name: Build APK
+        working-directory: android
+        run: |
+          chmod +x gradlew || true
+          ./gradlew assembleDebug
+        env:
+          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiliwili-android-${{ matrix.abi }}
+          path: android/app/build/outputs/apk/debug/*.apk

@@ -26,11 +26,16 @@
 #include <mpv/render_gl.h>
 #if defined(__PSV__) || defined(PS4)
 #include <GLES2/gl2.h>
+#elif defined(__ANDROID__)
+#include <GLES3/gl3.h>
+#include <EGL/egl.h>
 #else
 #include <glad/glad.h>
 #endif
 #ifdef __SDL2__
 #include <SDL2/SDL.h>
+#elif defined(__ANDROID__)
+// Android uses EGL for GL proc address resolution
 #else
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -370,6 +375,8 @@ public:
     inline static std::string PLAYER_HWDEC_METHOD = "vita-copy";
 #elif defined(PS4)
     inline static std::string PLAYER_HWDEC_METHOD = "no";
+#elif defined(__ANDROID__)
+    inline static std::string PLAYER_HWDEC_METHOD = "mediacodec-copy";
 #else
     inline static std::string PLAYER_HWDEC_METHOD = "auto-safe";
 #endif

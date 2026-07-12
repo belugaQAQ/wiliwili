@@ -1,0 +1,13 @@
+- [x] CMake 构建系统支持 PLATFORM_ANDROID 选项，能正确配置 NDK 交叉编译参数
+- [x] libmpv 可在 Android NDK 下成功编译，产出 libmpv.so（脚本已创建，需实际环境验证编译）
+- [x] Gradle 项目可成功构建 APK，包含 native 库和资源文件（结构已创建，需实际环境验证构建）
+- [x] borealis Android 平台适配层实现：窗口创建（ANativeWindow + EGL）、主循环、输入处理
+- [x] Android Activity 生命周期正确处理（onPause 暂停视频/onResume 恢复/onDestroy 释放资源）
+- [x] mpv 在 Android 上通过 EGL + OpenGL ES 成功渲染视频（代码路径已添加，需实际环境验证）
+- [x] Android TV 遥控器 D-Pad、确认、返回键正确映射为 borealis 导航操作
+- [x] ProgramConfig 在 Android 上使用正确的配置目录路径
+- [x] APPVersion::getPlatform() 在 Android 上返回 "android"
+- [x] 默认硬解模式为 mediacodec-copy
+- [x] AndroidManifest.xml 声明为 Leanback/TV 应用，支持横屏模式
+- [ ] APK 在 Android TV 模拟器上可安装、启动、显示 UI（需实际环境验证）
+- [ ] APK 在实体 Android TV 设备上可播放视频，遥控器操作流畅（需实际环境验证）
