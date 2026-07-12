@@ -1,0 +1,4 @@
+#!/bin/sh
+# Gradle wrapper stub - run 'gradle wrapper' to generate the actual wrapper
+# After that, this file will be replaced with the proper gradlew script
+exec gradle "$@"

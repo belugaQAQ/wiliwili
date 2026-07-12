@@ -1,7 +1,37 @@
 #include "utils/crash_helper.hpp"
 #include <borealis/core/logger.hpp>
 
-#if defined(_WIN32) && !defined(__WINRT__)
+#if defined(__ANDROID__)
+
+#include <android/log.h>
+#include <csignal>
+#include <cstdlib>
+#include <cstring>
+
+static void androidCrashHandler(int sig) {
+    const char* sigName = "Unknown";
+    switch (sig) {
+        case SIGSEGV: sigName = "SIGSEGV"; break;
+        case SIGABRT: sigName = "SIGABRT"; break;
+        case SIGFPE:  sigName = "SIGFPE";  break;
+        case SIGILL:  sigName = "SIGILL";  break;
+        case SIGBUS:  sigName = "SIGBUS";  break;
+        case SIGTRAP: sigName = "SIGTRAP"; break;
+    }
+    __android_log_write(ANDROID_LOG_FATAL, "wiliwili", fmt::format("Crash signal {} ({})", sigName, sig).c_str());
+    std::_Exit(1);
+}
+
+void wiliwili::initCrashDump() {
+    signal(SIGSEGV, androidCrashHandler);
+    signal(SIGABRT, androidCrashHandler);
+    signal(SIGFPE,  androidCrashHandler);
+    signal(SIGILL,  androidCrashHandler);
+    signal(SIGBUS,  androidCrashHandler);
+    signal(SIGTRAP, androidCrashHandler);
+}
+
+#elif defined(_WIN32) && !defined(__WINRT__)
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

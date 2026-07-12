@@ -1,0 +1,64 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'cn.xfangfang.wiliwili'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "cn.xfangfang.wiliwili"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.6.0"
+
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a'
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DPLATFORM_ANDROID=ON",
+                          "-DANDROID_STL=c++_shared",
+                          "-DUSE_SYSTEM_CURL=OFF",
+                          "-DUSE_SYSTEM_CPR=OFF"
+                targets "wiliwili"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+            jniDebuggable true
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "../../CMakeLists.txt"
+            version "3.22.1+"
+        }
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ['../../resources']
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    lint {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation 'androidx.leanback:leanback:1.0.0'
+    implementation 'androidx.core:core:1.10.1'
+}

@@ -4,6 +4,8 @@
 
 #ifdef IOS
 #include <CoreFoundation/CoreFoundation.h>
+#elif defined(__ANDROID__)
+#include <unistd.h>
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
 #include <unistd.h>
 #include <borealis/platforms/desktop/desktop_platform.hpp>
@@ -178,7 +180,10 @@ std::unordered_map<SettingItem, ProgramOption> ProgramConfig::SETTING_MAP = {
     {SettingItem::HIDE_BOTTOM_BAR, {"hide_bottom_bar", {}, {}, 0}},
 #endif
     {SettingItem::HIDE_FPS, {"hide_fps", {}, {}, 1}},
-#if defined(__APPLE__) || !defined(NDEBUG)
+#if defined(__ANDROID__)
+    // Android: default fullscreen
+    {SettingItem::FULLSCREEN, {"fullscreen", {}, {}, 1}},
+#elif defined(__APPLE__) || !defined(NDEBUG)
     // mac使用原生全屏按钮效果更好，不通过软件来控制
     // win32 debug 模式不全屏，调试时会挡住 vs
     {SettingItem::FULLSCREEN, {"fullscreen", {}, {}, 0}},
@@ -192,7 +197,7 @@ std::unordered_map<SettingItem, ProgramOption> ProgramConfig::SETTING_MAP = {
     {SettingItem::PLAYER_HIGHLIGHT_BAR, {"player_highlight_bar", {}, {}, 0}},
     {SettingItem::PLAYER_SKIP_OPENING_CREDITS, {"player_skip_opening_credits", {}, {}, 1}},
     {SettingItem::PLAYER_LOW_QUALITY, {"player_low_quality", {}, {}, 1}},
-#if defined(IOS) || defined(__PSV__) || defined(__SWITCH__)
+#if defined(IOS) || defined(__PSV__) || defined(__SWITCH__) || defined(__ANDROID__)
     {SettingItem::PLAYER_HWDEC, {"player_hwdec", {}, {}, 1}},
 #else
     {SettingItem::PLAYER_HWDEC, {"player_hwdec", {}, {}, 0}},
@@ -228,6 +233,9 @@ std::unordered_map<SettingItem, ProgramOption> ProgramConfig::SETTING_MAP = {
 #elif defined(__SWITCH__)
     {SettingItem::PLAYER_INMEMORY_CACHE,
      {"player_inmemory_cache", {"0MB", "10MB", "20MB", "50MB", "100MB"}, {0, 10, 20, 50, 100}, 0}},
+#elif defined(__ANDROID__)
+    {SettingItem::PLAYER_INMEMORY_CACHE,
+     {"player_inmemory_cache", {"0MB", "10MB", "20MB", "50MB", "100MB", "200MB"}, {0, 10, 20, 50, 100, 200}, 1}},
 #else
     {SettingItem::PLAYER_INMEMORY_CACHE,
      {"player_inmemory_cache", {"0MB", "10MB", "20MB", "50MB", "100MB"}, {0, 10, 20, 50, 100}, 1}},
@@ -516,6 +524,8 @@ void ProgramConfig::load() {
 
     // 初始化自定义手柄按键映射
 #ifdef IOS
+#elif defined(__ANDROID__)
+    brls::DesktopPlatform::GAMEPAD_DB = getConfigDir() + "/gamecontrollerdb.txt";
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
     brls::DesktopPlatform::GAMEPAD_DB = getConfigDir() + "/gamecontrollerdb.txt";
 #endif
@@ -692,6 +702,8 @@ void ProgramConfig::load() {
 #endif
     }
 #ifdef IOS
+#elif defined(__ANDROID__)
+    // Android: no window state management
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
     // 初始化上一次窗口位置
     loadHomeWindowState();
@@ -791,6 +803,8 @@ void ProgramConfig::load() {
 
         // 设置窗口最小尺寸
 #ifdef IOS
+#elif defined(__ANDROID__)
+        // Android: no window size limits
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
         int minWidth  = getIntOption(SettingItem::MINIMUM_WINDOW_WIDTH);
         int minHeight = getIntOption(SettingItem::MINIMUM_WINDOW_HEIGHT);
@@ -822,6 +836,8 @@ void ProgramConfig::load() {
     });
 
 #ifdef IOS
+#elif defined(__ANDROID__)
+    // Android: no window state to save
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
     // 窗口将要关闭时, 保存窗口状态配置
     brls::Application::getExitEvent()->subscribe([this]() { saveHomeWindowState(); });
@@ -1056,6 +1072,8 @@ void ProgramConfig::init() {
     ps4_mpv_dump_shaders            = 0;
     // 在加载第一帧之后隐藏启动画面
     brls::sync([]() { sceSystemServiceHideSplashScreen(); });
+#elif defined(__ANDROID__)
+    // Android: no special initialization needed
 #else
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != nullptr) {
@@ -1077,6 +1095,21 @@ void ProgramConfig::init() {
         // 自定义字体不存在，使用内置字体
 #if defined(__PSV__) || defined(PS4)
         brls::FontLoader::USER_ICON_PATH = BRLS_ASSET("font/keymap_ps.ttf");
+#elif defined(__ANDROID__)
+        // Android: use keymap setting like desktop
+        std::string icon = getSettingItem(SettingItem::KEYMAP, std::string{"xbox"});
+        if (icon == "xbox") {
+            brls::FontLoader::USER_ICON_PATH = BRLS_ASSET("font/keymap_xbox.ttf");
+        } else if (icon == "ps") {
+            brls::FontLoader::USER_ICON_PATH = BRLS_ASSET("font/keymap_ps.ttf");
+        } else {
+            brls::Application::setHintsLiteMode(true);
+            if (getBoolOption(SettingItem::APP_SWAP_ABXY)) {
+                brls::FontLoader::USER_ICON_PATH = BRLS_ASSET("font/keymap_keyboard_swap.ttf");
+            } else {
+                brls::FontLoader::USER_ICON_PATH = BRLS_ASSET("font/keymap_keyboard.ttf");
+            }
+        }
 #else
         std::string icon = getSettingItem(SettingItem::KEYMAP, std::string{"xbox"});
         if (icon == "xbox") {
@@ -1121,6 +1154,8 @@ void ProgramConfig::init() {
 std::string ProgramConfig::getHomePath() {
 #if defined(__SWITCH__)
     return "/";
+#elif defined(__ANDROID__)
+    return "/sdcard";
 #elif defined(_WIN32)
     return std::string(getenv("HOMEPATH"));
 #else
@@ -1135,6 +1170,13 @@ std::string ProgramConfig::getConfigDir() {
     return "/data/wiliwili";
 #elif defined(__PSV__)
     return "ux0:/data/wiliwili";
+#elif defined(__ANDROID__)
+    // Android: use internal storage via JNI, fallback to default
+    extern std::string androidDataPath;
+    if (!androidDataPath.empty()) {
+        return androidDataPath + "/wiliwili";
+    }
+    return "/data/data/cn.xfangfang.wiliwili/files/wiliwili";
 #elif defined(IOS)
     CFURLRef homeURL = CFCopyHomeDirectoryURL();
     if (homeURL != nullptr) {
@@ -1186,6 +1228,8 @@ void ProgramConfig::exit(char* argv[]) {
 #ifdef IOS
 #elif defined(PS4)
 #elif __PSV__
+#elif defined(__ANDROID__)
+    // Android: cannot execv, use native restart mechanism
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
     if (!brls::DesktopPlatform::RESTART_APP) return;
 #ifdef __linux__

@@ -35,6 +35,8 @@ std::string APPVersion::getVersionStr() { return fmt::format("{}.{}.{}", major, 
 std::string APPVersion::getPlatform() {
 #ifdef IOS
     return "iOS";
+#elif defined(__ANDROID__)
+    return "Android";
 #elif defined(__APPLE__)
     return "macOS";
 #elif defined(PS4)

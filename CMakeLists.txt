@@ -68,6 +68,9 @@ if (MPV_BUNDLE_DLL)
     list(APPEND APP_PLATFORM_LIB MemoryModule)
 endif ()
 
+# Android
+cmake_dependent_option(PLATFORM_ANDROID "Build for Android" OFF "NOT PLATFORM_DESKTOP;NOT PLATFORM_SWITCH;NOT PLATFORM_PS4;NOT PLATFORM_PSV;NOT PLATFORM_IOS" OFF)
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/extra.cmake)
 
 # toolchain
@@ -132,6 +135,26 @@ elseif (APP_PLATFORM_CUSTOM_LIBS)
     #   -DAPP_PLATFORM_CUSTOM_LIBS=ON \
     #   -DAPP_PLATFORM_INCLUDE="/opt/vita/include" \
     #   -DAPP_PLATFORM_LINK_OPTION="-L/opt/vita/lib -lmpv -lwebp"
+elseif (PLATFORM_ANDROID)
+    # Android: mpv and webp are provided as prebuilt libraries
+    # Set paths via -DMPV_INCLUDE_DIR, -DMPV_LIBRARY, -DWebP_INCLUDE_DIRS, -DWebP_LIBRARY
+    # or via environment variables
+    find_package(MPV REQUIRED)
+    message(STATUS "Found libmpv: ${MPV_VERSION} ${MPV_INCLUDE_DIR} ${MPV_LIBRARY}")
+    list(APPEND APP_PLATFORM_INCLUDE ${MPV_INCLUDE_DIR})
+    list(APPEND APP_PLATFORM_LIB ${MPV_LIBRARY})
+
+    find_package(WebP)
+    if (WebP_FOUND AND NOT DISABLE_WEBP)
+        message(STATUS "Found webp: ${WebP_INCLUDE_DIRS} ${WebP_LIBRARY}")
+        list(APPEND APP_PLATFORM_OPTION -DUSE_WEBP)
+        list(APPEND APP_PLATFORM_INCLUDE ${WebP_INCLUDE_DIRS})
+        list(APPEND APP_PLATFORM_LIB ${WebP_LIBRARY})
+    endif ()
+
+    list(APPEND APP_PLATFORM_OPTION -D__ANDROID__)
+    # Android platform libs
+    list(APPEND APP_PLATFORM_LIB log android)
 else ()
     # Used for Cross Compile such as NintendoSwitch
     # If dependent files cannot be found, environment variables can be set before executing the cmake command:
@@ -300,6 +323,15 @@ elseif (PLATFORM_PS4)
             COMMAND "${CMAKE_COMMAND}" -E rename ${CMAKE_BINARY_DIR}/ps4/resources/i18n/ja-RYU ${CMAKE_BINARY_DIR}/ps4/resources/i18n/RYU
     )
     add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}.data)
+elseif (PLATFORM_ANDROID)
+    # Android builds are handled by Gradle; CMake only produces the native library
+    if (NOT USE_LIBROMFS)
+        add_custom_target(${PROJECT_NAME}.data
+            COMMAND "${CMAKE_COMMAND}" -E copy_directory ${PROJECT_RESOURCES} ${CMAKE_BINARY_DIR}/resources
+            COMMAND "echo" "copy resources"
+        )
+        add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}.data)
+    endif ()
 elseif (PLATFORM_SWITCH)
     set(BUILD_FONT_DIR ${CMAKE_BINARY_DIR}/resources/font)
     if (GIT_TAG_VERSION)

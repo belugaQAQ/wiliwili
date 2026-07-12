@@ -26,12 +26,14 @@
 #include "view/mpv_core.hpp"
 #include "view/video_view.hpp"
 
-#if defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
+#if defined(__APPLE__) || defined(__linux__) || defined(_WIN32) || defined(__ANDROID__)
 #include "borealis/platforms/desktop/desktop_platform.hpp"
 #endif
 
 #ifdef __linux__
+#if !defined(__ANDROID__)
 #include "borealis/platforms/desktop/steam_deck.hpp"
+#endif
 #endif
 
 using namespace brls::literals;
@@ -190,7 +192,7 @@ void SettingActivity::onContentAvailable() {
         return true;
     });
 
-#if defined(__SWITCH__) || defined(__PSV__) || defined(PS4)
+#if defined(__SWITCH__) || defined(__PSV__) || defined(PS4) || defined(__ANDROID__)
     btnOpenConfig->title->setText("wiliwili/setting/tools/others/config_dir"_i18n);
 #endif
 #ifdef __linux__
@@ -201,7 +203,9 @@ void SettingActivity::onContentAvailable() {
     btnOpenConfig->registerClickAction([](...) -> bool {
         auto configPath = ProgramConfig::instance().getConfigDir();
         brls::Application::notify("wiliwili/setting/tools/others/config_dir"_i18n + ": " + configPath);
-#if !defined(__SWITCH__) && !defined(__PSV__) && !defined(PS4)
+#if defined(__ANDROID__)
+        // Android: cannot open file manager directly
+#elif !defined(__SWITCH__) && !defined(__PSV__) && !defined(PS4)
 #ifdef __linux__
         if (!brls::isSteamDeck())
 #endif
@@ -392,6 +396,7 @@ void SettingActivity::onContentAvailable() {
                              brls::Application::getPlatform()->getVideoContext()->fullScreen(value);
                          });
 
+#if !defined(__ANDROID__)
     cellWindowFullscreen->init(
         "wiliwili/setting/app/playback/window_fullscreen_on_app_fullscreen"_i18n,
         conf.getBoolOption(SettingItem::PLAYER_WINDOW_FULLSCREEN_ON_APP_FULLSCREEN), [](bool value) {
@@ -425,6 +430,10 @@ void SettingActivity::onContentAvailable() {
             "wiliwili/setting/app/others/always_on_top_hint"_i18n);
         return true;
     });
+#else  // __ANDROID__
+    cellWindowFullscreen->setVisibility(brls::Visibility::GONE);
+    cellOnTopMode->setVisibility(brls::Visibility::GONE);
+#endif
 
 #else
     cellFullscreen->setVisibility(brls::Visibility::GONE);
@@ -498,6 +507,7 @@ void SettingActivity::onContentAvailable() {
 
     /// App Keymap
 #if !defined(__SWITCH__) && !defined(__PSV__) && !defined(PS4)
+    // Android and desktop: show keymap selector (for gamepad support)
     static int keyIndex = conf.getStringOptionIndex(SettingItem::KEYMAP);
     selectorKeymap->init("wiliwili/setting/app/others/keymap/header"_i18n,
                          {
@@ -633,6 +643,8 @@ void SettingActivity::onContentAvailable() {
     selectorInmemory->init("wiliwili/setting/app/playback/in_memory_cache"_i18n,
 #ifdef __PSV__
                            {"0MB (" + "hints/off"_i18n + ")", "1MB", "5MB", "10MB"},
+#elif defined(__ANDROID__)
+        {"0MB (" + "hints/off"_i18n + ")", "10MB", "20MB", "50MB", "100MB", "200MB"},
 #else
         {"0MB (" + "hints/off"_i18n + ")", "10MB", "20MB", "50MB", "100MB"},
 #endif
