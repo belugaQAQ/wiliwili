@@ -6,9 +6,10 @@ set -e
 
 ANDROID_NDK_HOME=${ANDROID_NDK_HOME:-/opt/android-ndk}
 ANDROID_API=21
-INSTALL_DIR=$(dirname "$0")/build
-SOURCE_DIR=$(dirname "$0")/mpv-source
-FFMPEG_DIR=$(dirname "$0")/../ffmpeg/build
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+INSTALL_DIR=${SCRIPT_DIR}/build
+SOURCE_DIR=${SCRIPT_DIR}/mpv-source
+FFMPEG_DIR=${SCRIPT_DIR}/../ffmpeg/build
 
 ABI=${1:-arm64-v8a}
 
