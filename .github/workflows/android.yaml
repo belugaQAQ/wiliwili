@@ -42,10 +42,6 @@ jobs:
       - name: Build native deps (FFmpeg + libmpv)
         run: bash scripts/android/build_all.sh ${{ matrix.abi }}
 
-      - name: Ensure Android platform 34 (compileSdk 34)
-        run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-34" || true
-
       - name: Copy native libraries to jniLibs
         run: |
           case "${{ matrix.abi }}" in
