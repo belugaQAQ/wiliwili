@@ -46,7 +46,9 @@ jobs:
         run: bash scripts/android/build_all.sh ${{ matrix.abi }}
 
       - name: Build libromfs-generator (host tool for borealis)
-        run: bash library/borealis/build_libromfs_generator.sh
+        run: |
+          cd library/borealis
+          bash build_libromfs_generator.sh
 
       - name: Copy native libraries to jniLibs
         run: |
