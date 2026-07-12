@@ -139,6 +139,24 @@ elseif (PLATFORM_ANDROID)
     # Android: mpv and webp are provided as prebuilt libraries
     # Set paths via -DMPV_INCLUDE_DIR, -DMPV_LIBRARY, -DWebP_INCLUDE_DIRS, -DWebP_LIBRARY
     # or via environment variables
+    #
+    # If not passed explicitly, derive them from WILIWILI_PREFIX (pointing at
+    # scripts/android/buildscripts/prefix) and the current ANDROID_ABI, using the
+    # mpv-android arch layout (arm64-v8a -> arm64, armeabi-v7a -> armv7l).
+    if (NOT MPV_INCLUDE_DIR AND NOT MPV_LIBRARY AND ANDROID_ABI)
+        if (ANDROID_ABI STREQUAL "arm64-v8a")
+            set(_wili_arch arm64)
+        elseif (ANDROID_ABI STREQUAL "armeabi-v7a")
+            set(_wili_arch armv7l)
+        elseif (ANDROID_ABI STREQUAL "x86_64")
+            set(_wili_arch x86_64)
+        endif ()
+        if (_wili_arch AND EXISTS "${WILIWILI_PREFIX}/${_wili_arch}/include/client.h")
+            set(MPV_INCLUDE_DIR "${WILIWILI_PREFIX}/${_wili_arch}/include" CACHE PATH "libmpv include dir")
+            set(MPV_LIBRARY "${WILIWILI_PREFIX}/${_wili_arch}/lib/libmpv.so" CACHE FILEPATH "libmpv library")
+        endif ()
+        unset(_wili_arch)
+    endif ()
     find_package(MPV REQUIRED)
     message(STATUS "Found libmpv: ${MPV_VERSION} ${MPV_INCLUDE_DIR} ${MPV_LIBRARY}")
     list(APPEND APP_PLATFORM_INCLUDE ${MPV_INCLUDE_DIR})

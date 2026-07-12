@@ -22,7 +22,9 @@ android {
                 arguments "-DPLATFORM_ANDROID=ON",
                           "-DANDROID_STL=c++_shared",
                           "-DUSE_SYSTEM_CURL=OFF",
-                          "-DUSE_SYSTEM_CPR=OFF"
+                          "-DUSE_SYSTEM_CPR=OFF",
+                          "-DWILIWILI_PREFIX=${rootProject.projectDir}/../scripts/android/buildscripts/prefix",
+                          "-DDISABLE_WEBP=ON"
                 targets "wiliwili"
             }
         }

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-SCRIPT_DIR=$(dirname "$0")
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 PROJECT_ROOT=$(realpath "${SCRIPT_DIR}/../..")
 ANDROID_DIR="${PROJECT_ROOT}/android"
 ABI=${1:-arm64-v8a}
@@ -10,34 +10,34 @@ echo "=== wiliwili Android APK Build Script ==="
 echo "Project root: ${PROJECT_ROOT}"
 echo "Target ABI: ${ABI}"
 
-# Check for Android SDK/NDK
+# Map ABI -> buildscripts arch name (matches build_all.sh)
+case $ABI in
+    arm64-v8a)    ARCH=arm64   ;;
+    armeabi-v7a)  ARCH=armv7l  ;;
+    x86_64)       ARCH=x86_64  ;;
+    *)
+        echo "ERROR: Unsupported ABI: $ABI"
+        exit 1
+        ;;
+esac
+
+# Check for Android SDK (needed by Gradle)
 if [ -z "$ANDROID_HOME" ]; then
     echo "ERROR: ANDROID_HOME is not set. Please install Android SDK."
     echo "  export ANDROID_HOME=/path/to/android-sdk"
     exit 1
 fi
 
-if [ -z "$ANDROID_NDK_HOME" ]; then
-    # Try to find NDK within SDK
-    if [ -d "$ANDROID_HOME/ndk" ]; then
-        NDK_VERSION=$(ls "$ANDROID_HOME/ndk" | sort -V | tail -1)
-        export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$NDK_VERSION"
-        echo "Using NDK: $ANDROID_NDK_HOME"
-    else
-        echo "ERROR: ANDROID_NDK_HOME is not set and no NDK found in SDK."
-        echo "  Install NDK via sdkmanager: sdkmanager 'ndk;26.1.10909125'"
-        exit 1
-    fi
-fi
+PREFIX="${SCRIPT_DIR}/buildscripts/prefix/${ARCH}"
 
-# Build native dependencies first
+# Build native dependencies first if not already built
 echo ""
 echo "=== Step 1: Building native dependencies ==="
-if [ ! -f "${SCRIPT_DIR}/mpv/build/${ABI}/lib/libmpv.so" ]; then
-    echo "Building FFmpeg and mpv for ${ABI}..."
+if [ ! -f "${PREFIX}/lib/libmpv.so" ]; then
+    echo "Building native deps for ${ABI}..."
     bash "${SCRIPT_DIR}/build_all.sh" "${ABI}"
 else
-    echo "Native dependencies already built, skipping."
+    echo "Native dependencies already built at ${PREFIX}, skipping."
 fi
 
 # Copy prebuilt native libraries to jniLibs
@@ -46,16 +46,13 @@ echo "=== Step 2: Copying native libraries ==="
 JNI_LIBS_DIR="${ANDROID_DIR}/app/libs/${ABI}"
 mkdir -p "${JNI_LIBS_DIR}"
 
-# Copy mpv
-if [ -f "${SCRIPT_DIR}/mpv/build/${ABI}/lib/libmpv.so" ]; then
-    cp "${SCRIPT_DIR}/mpv/build/${ABI}/lib/libmpv.so" "${JNI_LIBS_DIR}/"
-    echo "Copied libmpv.so"
-fi
-
-# Copy FFmpeg libraries
-if [ -d "${SCRIPT_DIR}/ffmpeg/build/${ABI}/lib" ]; then
-    cp "${SCRIPT_DIR}/ffmpeg/build/${ABI}/lib/"*.so "${JNI_LIBS_DIR}/" 2>/dev/null || true
-    echo "Copied FFmpeg libraries"
+# Copy libmpv + FFmpeg shared libs (deps are statically linked into libmpv.so)
+if [ -d "${PREFIX}/lib" ]; then
+    cp "${PREFIX}/lib/"*.so "${JNI_LIBS_DIR}/" 2>/dev/null || true
+    echo "Copied shared libs from ${PREFIX}/lib"
+else
+    echo "ERROR: prefix lib dir not found: ${PREFIX}/lib"
+    exit 1
 fi
 
 echo "Native libraries in ${JNI_LIBS_DIR}:"
@@ -70,7 +67,6 @@ chmod +x gradlew 2>/dev/null || true
 if [ -f "gradlew" ]; then
     ./gradlew assembleDebug
 else
-    # Use system gradle
     gradle assembleDebug
 fi
 

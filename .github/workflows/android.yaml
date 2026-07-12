@@ -2,13 +2,13 @@ name: Android Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, yoga ]
     paths-ignore:
       - '**.md'
       - 'docs/**'
       - 'resources/i18n/**'
   pull_request:
-    branches: [ main ]
+    branches: [ main, yoga ]
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,10 @@ jobs:
     strategy:
       matrix:
         abi: [ arm64-v8a, armeabi-v7a ]
-
+    env:
+      # SDK + NDK are fetched by buildscripts/download.sh; Gradle reuses them.
+      ANDROID_HOME: ${{ github.workspace }}/scripts/android/buildscripts/sdk/android-sdk-linux
+      ANDROID_NDK_HOME: ${{ github.workspace }}/scripts/android/buildscripts/sdk/android-ndk-r29
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,36 +32,38 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install NDK
-        run: |
-          sdkmanager "ndk;26.1.10909125"
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
-
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y meson ninja-build nasm yasm python3-pip
+          sudo apt-get install -y autoconf pkg-config libtool ninja-build nasm yasm unzip wget gperf
+          # recent meson (mpv/libplacebo master require >= 1.0; Ubuntu 22.04 ships 0.61)
+          pip3 install meson
 
-      - name: Build FFmpeg
-        run: bash scripts/android/ffmpeg/build.sh ${{ matrix.abi }}
+      - name: Build native deps (FFmpeg + libmpv)
+        run: bash scripts/android/build_all.sh ${{ matrix.abi }}
 
-      - name: Build libmpv
-        run: bash scripts/android/mpv/build.sh ${{ matrix.abi }}
-
-      - name: Copy native libraries
+      - name: Ensure Android platform 34 (compileSdk 34)
         run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-34" || true
+
+      - name: Copy native libraries to jniLibs
+        run: |
+          case "${{ matrix.abi }}" in
+            arm64-v8a)   ARCH=arm64  ;;
+            armeabi-v7a) ARCH=armv7l ;;
+          esac
           mkdir -p android/app/libs/${{ matrix.abi }}
-          cp scripts/android/mpv/build/${{ matrix.abi }}/lib/libmpv.so android/app/libs/${{ matrix.abi }}/
-          cp scripts/android/ffmpeg/build/${{ matrix.abi }}/lib/*.so android/app/libs/${{ matrix.abi }}/ 2>/dev/null || true
+          cp scripts/android/buildscripts/prefix/${ARCH}/lib/*.so android/app/libs/${{ matrix.abi }}/
+          echo "=== jniLibs for ${{ matrix.abi }} ==="
+          ls -la android/app/libs/${{ matrix.abi }}/
 
       - name: Build APK
         working-directory: android
         run: |
           chmod +x gradlew || true
-          ./gradlew assembleDebug
+          # Limit CMake/externalNativeBuild to this matrix ABI only (build.gradle's
+          # abiFilters otherwise forces both ABIs, but each job built one libmpv).
+          ./gradlew assembleDebug -Pandroid.injected.build.abi=${{ matrix.abi }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
