@@ -5,6 +5,7 @@ plugins {
 android {
     namespace 'cn.xfangfang.wiliwili'
     compileSdk 34
+    ndkVersion "29.0.14206865"
 
     defaultConfig {
         applicationId "cn.xfangfang.wiliwili"
