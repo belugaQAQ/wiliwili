@@ -32,17 +32,24 @@ case $ABI in
         ;;
 esac
 
-CC=${TARGET}${ANDROID_API}-clang
 TOOLCHAIN=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64
 PREFIX=${INSTALL_DIR}/${ABI}
 
-echo "Building FFmpeg for Android ${ABI}..."
+# Explicit tool paths for LLVM-based NDK
+CC=${TOOLCHAIN}/bin/${TARGET}${ANDROID_API}-clang
+CXX=${TOOLCHAIN}/bin/${TARGET}${ANDROID_API}-clang++
+AR=${TOOLCHAIN}/bin/llvm-ar
+NM=${TOOLCHAIN}/bin/llvm-nm
+RANLIB=${TOOLCHAIN}/bin/llvm-ranlib
+STRIP=${TOOLCHAIN}/bin/llvm-strip
+LD=${TOOLCHAIN}/bin/ld.lld
 
-# Add NDK toolchain to PATH so cross-compiler can be found
-export PATH="${TOOLCHAIN}/bin:${PATH}"
+echo "Building FFmpeg for Android ${ABI}..."
+echo "CC=${CC}"
+echo "AR=${AR}"
 
 if [ ! -d "$SOURCE_DIR" ]; then
-    git clone --depth 1 https://github.com/FFmpeg/FFmpeg.git "$SOURCE_DIR"
+    git clone --depth 1 --branch n7.1 https://github.com/FFmpeg/FFmpeg.git "$SOURCE_DIR"
 fi
 
 cd "$SOURCE_DIR"
@@ -50,8 +57,12 @@ cd "$SOURCE_DIR"
 ./configure \
     --prefix=${PREFIX} \
     --enable-cross-compile \
-    --cross-prefix=${TARGET}- \
     --cc=${CC} \
+    --ar=${AR} \
+    --nm=${NM} \
+    --ranlib=${RANLIB} \
+    --strip=${STRIP} \
+    --ld=${LD} \
     --target-os=android \
     --arch=${ARCH} \
     --sysroot=${TOOLCHAIN}/sysroot \
@@ -59,6 +70,7 @@ cd "$SOURCE_DIR"
     --enable-version3 \
     --enable-shared \
     --disable-static \
+    --enable-pic \
     --disable-programs \
     --disable-doc \
     --disable-avdevice \
