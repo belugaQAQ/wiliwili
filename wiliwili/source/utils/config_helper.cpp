@@ -7,6 +7,8 @@
 #elif defined(__ANDROID__)
 #include <unistd.h>
 #include <SDL2/SDL.h>
+#include <mbedtls/ssl.h>
+#include <mbedtls/error.h>
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
 #include <unistd.h>
 #include <borealis/platforms/desktop/desktop_platform.hpp>
@@ -1052,6 +1054,46 @@ void ProgramConfig::init() {
     curl_global_init_mem(CURL_GLOBAL_DEFAULT, sce_malloc, sce_free, sce_realloc, sce_strdup, sce_calloc);
 #else
     curl_global_init(CURL_GLOBAL_DEFAULT);
+#endif
+#if defined(__ANDROID__)
+    // Android: diagnose and fix "mbedTLS: ssl_init failed".
+    // curl 8.4.0's mbedtls backend does NOT call psa_crypto_init(), which
+    // mbedtls 3.6.5 requires when MBEDTLS_USE_PSA_CRYPTO is enabled. If our
+    // build still has PSA enabled, call psa_crypto_init() here as a runtime
+    // fix. Also run a ssl_setup self-test and log the exact error code so
+    // we can identify the root cause if the problem persists.
+    {
+#if defined(MBEDTLS_USE_PSA_CRYPTO)
+        brls::Logger::info("mbedtls: MBEDTLS_USE_PSA_CRYPTO is DEFINED — calling psa_crypto_init()");
+        extern int psa_crypto_init(void);
+        int psa_ret = psa_crypto_init();
+        brls::Logger::info("mbedtls: psa_crypto_init() returned: {}", psa_ret);
+#else
+        brls::Logger::info("mbedtls: MBEDTLS_USE_PSA_CRYPTO is NOT defined");
+#endif
+        mbedtls_ssl_config ssl_conf;
+        mbedtls_ssl_context ssl_ctx;
+        mbedtls_ssl_config_init(&ssl_conf);
+        mbedtls_ssl_init(&ssl_ctx);
+        int ret = mbedtls_ssl_config_defaults(&ssl_conf, MBEDTLS_SSL_IS_CLIENT,
+            MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
+        if (ret != 0) {
+            char errbuf[128] = {0};
+            mbedtls_strerror(ret, errbuf, sizeof(errbuf));
+            brls::Logger::error("mbedtls: ssl_config_defaults failed: -0x{:04X} {}", -ret, errbuf);
+        } else {
+            ret = mbedtls_ssl_setup(&ssl_ctx, &ssl_conf);
+            if (ret != 0) {
+                char errbuf[128] = {0};
+                mbedtls_strerror(ret, errbuf, sizeof(errbuf));
+                brls::Logger::error("mbedtls: ssl_setup failed: -0x{:04X} {}", -ret, errbuf);
+            } else {
+                brls::Logger::info("mbedtls: ssl_setup OK — TLS should work");
+            }
+        }
+        mbedtls_ssl_free(&ssl_ctx);
+        mbedtls_ssl_config_free(&ssl_conf);
+    }
 #endif
     cpr::async::startup(THREAD_POOL_MIN_THREAD_NUM, THREAD_POOL_MAX_THREAD_NUM, std::chrono::milliseconds(5000));
 

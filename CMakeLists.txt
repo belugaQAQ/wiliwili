@@ -170,6 +170,13 @@ elseif (PLATFORM_ANDROID)
     list(APPEND APP_PLATFORM_INCLUDE ${MPV_INCLUDE_DIR})
     list(APPEND APP_PLATFORM_LIB ${MPV_LIBRARY})
 
+    # Add mbedtls headers so config_helper.cpp can run a startup SSL
+    # self-test (prints the exact error code behind "ssl_init failed").
+    find_path(MBEDTLS_INCLUDE_DIR mbedtls/ssl.h)
+    if (MBEDTLS_INCLUDE_DIR)
+        list(APPEND APP_PLATFORM_INCLUDE ${MBEDTLS_INCLUDE_DIR})
+    endif ()
+
     find_package(WebP)
     if (WebP_FOUND AND NOT DISABLE_WEBP)
         message(STATUS "Found webp: ${WebP_INCLUDE_DIRS} ${WebP_LIBRARY}")
