@@ -15,7 +15,14 @@ android {
         versionName "1.6.0"
 
         ndk {
-            abiFilters 'arm64-v8a', 'armeabi-v7a'
+            // CI passes -Pwiliwili.abi=<abi> to build one ABI per matrix job.
+            // Without it (local builds) both ABIs are built and packaged.
+            def wiliAbi = project.findProperty("wiliwili.abi")
+            if (wiliAbi != null) {
+                abiFilters wiliAbi
+            } else {
+                abiFilters 'arm64-v8a', 'armeabi-v7a'
+            }
         }
 
         externalNativeBuild {

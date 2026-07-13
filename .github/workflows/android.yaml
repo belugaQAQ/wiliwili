@@ -65,22 +65,25 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew || true
-          # Limit CMake/externalNativeBuild to this matrix ABI only (build.gradle's
-          # abiFilters otherwise forces both ABIs, but each job built one libmpv).
-          ./gradlew assembleDebug -Pandroid.injected.build.abi=${{ matrix.abi }}
+          # Use a custom wiliwili.abi property (consumed by app/build.gradle)
+          # instead of android.injected.build.abi — the latter is an IDE-deploy
+          # injected property that can cause AGP to skip writing the final APK
+          # to outputs/apk/. With abiFilters set to a single ABI via our own
+          # property, CMake builds one ABI and the APK lands in the normal
+          # outputs/apk/debug/ directory.
+          ./gradlew assembleDebug -Pwiliwili.abi=${{ matrix.abi }}
 
       - name: Locate built APK
-        # AGP 8.7 with android.injected.build.abi may place the APK in a
-        # per-ABI subdirectory (e.g. apk/debug/<abi>/) rather than directly
-        # under apk/debug/. Print every *.apk under outputs/ so the upload
-        # step can be pointed at the real location.
+        # Diagnostics: list every .apk anywhere under app/build/ so we can see
+        # the real output location (outputs/ vs intermediates/) in the log.
         run: |
-          echo "=== APK files under android/app/build/outputs ==="
-          find android/app/build/outputs -name '*.apk' -printf '%p (%s bytes)\n' 2>/dev/null || true
+          echo "=== APK files under android/app/build ==="
+          find android/app/build -name '*.apk' -printf '%p (%s bytes)\n' 2>/dev/null || true
+          echo "=== contents of android/app/build/outputs ==="
+          ls -R android/app/build/outputs 2>/dev/null || echo "(no outputs dir)"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: wiliwili-android-${{ matrix.abi }}
-          # Recursive glob: matches apk/debug/*.apk AND apk/debug/<abi>/*.apk.
           path: android/app/build/outputs/apk/**/*.apk
