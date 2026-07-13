@@ -158,6 +158,10 @@ elseif (PLATFORM_ANDROID)
             # CMAKE_PREFIX_PATH. Add our prefix there too, or FindMPV.cmake's
             # own find_path/find_library calls won't see the prebuilt mpv.
             list(PREPEND CMAKE_FIND_ROOT_PATH "${WILIWILI_PREFIX}/${_wili_arch}")
+            # buildscripts also installs libmbedcrypto/libmbedtls/libmbedx509
+            # here; library/CMakeLists.txt adds them by short name (-lmbedcrypto
+            # etc.), so the linker needs this directory on its search path.
+            link_directories("${WILIWILI_PREFIX}/${_wili_arch}/lib")
         endif ()
         unset(_wili_arch)
     endif ()
