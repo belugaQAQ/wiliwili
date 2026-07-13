@@ -268,12 +268,17 @@ if (PLATFORM_ANDROID)
 endif ()
 
 if (PLATFORM_ANDROID)
-    # curl 8.4.0 (fetched by cpr) uses fseeko in lib/formdata.c. On 32-bit
-    # ABIs (armeabi-v7a) NDK r29 does not expose fseeko unless
-    # _FILE_OFFSET_BITS=64 is defined before stdio.h is included. Define it
-    # globally before any subdirectory so curl, cpr and all third-party code
-    # see the large-file declarations consistently.
-    add_compile_definitions(_FILE_OFFSET_BITS=64)
+    # curl 8.4.0 (fetched by cpr) uses fseeko in lib/formdata.c:796. On the
+    # 32-bit armeabi-v7a ABI, NDK r29's sysroot only declares fseeko when
+    # _FILE_OFFSET_BITS=64 is visible before stdio.h is included. Setting it
+    # via add_compile_definitions is not enough because cpr pulls curl through
+    # FetchContent_MakeAvailable, which runs curl's own try_compile checks
+    # (check_symbol_exists(fseeko)) in a scope that does not inherit our
+    # definition; the probe fails and curl falls back to a code path that
+    # still calls fseeko unguarded, breaking the build.
+    # Bake the macro into CMAKE_C_FLAGS (cache) so every C compilation —
+    # including curl's feature probes — sees it.
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FILE_OFFSET_BITS=64" CACHE STRING "" FORCE)
 endif ()
 
 add_subdirectory(library)
