@@ -37,6 +37,16 @@ else ()
         set(CPR_FORCE_MBEDTLS_BACKEND ON)
         set(CPR_SKIP_CA_BUNDLE_SEARCH ON)
 
+        # Force threaded resolver ON for curl. Although curl's CMakeLists
+        # defaults ENABLE_THREADED_RESOLVER to ON when ENABLE_ARES is OFF,
+        # the dependent_option can be silently disabled if Threads detection
+        # runs in an unexpected order under the NDK toolchain. Without
+        # threaded resolver, curl uses synchronous getaddrinfo which blocks
+        # the multi state machine and causes every DNS lookup to hit the
+        # overall request timeout ("Resolving timed out after Nms").
+        set(ENABLE_THREADED_RESOLVER ON CACHE BOOL "" FORCE)
+        set(ENABLE_ARES OFF CACHE BOOL "" FORCE)
+
         # Pre-locate MbedTLS and export the exact paths to cpr/curl.
         # cpr's FindMbedTLS.cmake runs find_path/find_library, which under
         # the Android NDK toolchain only search CMAKE_FIND_ROOT_PATH (set

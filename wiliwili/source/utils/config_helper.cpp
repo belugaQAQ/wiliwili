@@ -1152,8 +1152,15 @@ void ProgramConfig::init() {
         });
     BILI::setProxy(httpProxy, httpsProxy);
     BILI::setTlsVerify(getBoolOption(SettingItem::TLS_VERIFY));
+#if defined(__ANDROID__)
+    // Android TV devices often have slower network/DNS than desktop;
+    // 5s is too tight and causes "Resolving timed out after 5001ms".
+    BILI::setHttpTimeout(getSettingItem(SettingItem::HTTP_TIMEOUT, 15000));
+    BILI::setConnectionTimeout(getSettingItem(SettingItem::HTTP_CONNECTION_TIMEOUT, 10000));
+#else
     BILI::setHttpTimeout(getSettingItem(SettingItem::HTTP_TIMEOUT, 5000));
     BILI::setConnectionTimeout(getSettingItem(SettingItem::HTTP_CONNECTION_TIMEOUT, 0));
+#endif
     BILI::setDnsCacheTimeout(getSettingItem(SettingItem::HTTP_DNS_CACHE_TIMEOUT, WILI_DNS_CACHE_TIMEOUT));
 }
 
