@@ -268,16 +268,15 @@ if (PLATFORM_ANDROID)
 endif ()
 
 if (PLATFORM_ANDROID)
-    # curl 8.4.0 (fetched by cpr) calls fseeko in lib/formdata.c:796. On the
-    # 32-bit armeabi-v7a ABI, NDK r29's bionic does not expose fseeko in a
-    # way curl's check_symbol_exists probe accepts, so curl falls back to a
-    # code path that still calls fseeko unguarded, breaking the build.
-    # Bake _FILE_OFFSET_BITS=64 into CMAKE_C_FLAGS so the macro is visible
-    # to every C compilation (including curl's feature probes), and also
-    # force-disable curl's HAVE_FSEEKO cache var so curl uses fseek/ftell
-    # instead of fseeko/ftello on Android.
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FILE_OFFSET_BITS=64" CACHE STRING "" FORCE)
-    set(HAVE_FSEEKO OFF CACHE BOOL "" FORCE)
+    # curl 8.4.0 (fetched by cpr) calls fseeko/ftello in lib/formdata.c.
+    # NDK r29's bionic on the 32-bit armeabi-v7a ABI does not declare
+    # fseeko/ftello in a way curl's check_symbol_exists probe accepts, so
+    # curl keeps calling them unguarded and the build fails.
+    # HAVE_FSEEKO=OFF did not help because curl's own check_symbol_exists
+    # overwrites the cache var. Instead, define fseeko/ftello as macros
+    # aliasing the always-available fseek/ftell at the preprocessor level,
+    # so every curl source file that calls fseeko/ftello compiles cleanly.
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FILE_OFFSET_BITS=64 -Dfseeko=fseek -Dftello=ftell" CACHE STRING "" FORCE)
 endif ()
 
 add_subdirectory(library)
