@@ -59,7 +59,14 @@ android {
 
     sourceSets {
         main {
-            assets.srcDirs = ['../../resources']
+            // Resources (font, xml, i18n, svg, ...) are embedded into
+            // libwiliwili.so by libromfs at compile time (toolchain.cmake
+            // auto-enables USE_LIBROMFS on Android), so they are NOT read
+            // from APK assets at runtime. Listing resources/ as an assets
+            // source dir only duplicates them into the APK and causes
+            // "Failed to load asset path /proc/<pid>/fd/<n>" because AGP
+            // compresses those entries and SDL2's Java AssetManager.openFd
+            // can't mmap compressed assets.
             jniLibs.srcDirs = ['libs']
         }
     }
