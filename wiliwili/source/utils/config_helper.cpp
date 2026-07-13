@@ -6,6 +6,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #elif defined(__ANDROID__)
 #include <unistd.h>
+#include <SDL2/SDL.h>
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
 #include <unistd.h>
 #include <borealis/platforms/desktop/desktop_platform.hpp>
@@ -1169,10 +1170,13 @@ std::string ProgramConfig::getConfigDir() {
 #elif defined(__PSV__)
     return "ux0:/data/wiliwili";
 #elif defined(__ANDROID__)
-    // Android: use internal storage via JNI, fallback to default
-    extern std::string androidDataPath;
-    if (!androidDataPath.empty()) {
-        return androidDataPath + "/wiliwili";
+    // Android: use SDL's internal storage path API (provided by SDLActivity).
+    // Falls back to the package data dir constant if SDL is not ready yet.
+    {
+        const char* path = SDL_AndroidGetInternalStoragePath();
+        if (path && path[0]) {
+            return std::string(path) + "/wiliwili";
+        }
     }
     return "/data/data/cn.xfangfang.wiliwili/files/wiliwili";
 #elif defined(IOS)
