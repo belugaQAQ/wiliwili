@@ -18,6 +18,8 @@
 #endif
 
 #include <cmath>
+#include <cstdarg>
+#include <cstdio>
 #include <borealis/core/application.hpp>
 #include <borealis/core/cache_helper.hpp>
 #include <borealis/core/touch/pan_gesture.hpp>
@@ -1062,37 +1064,68 @@ void ProgramConfig::init() {
     // build still has PSA enabled, call psa_crypto_init() here as a runtime
     // fix. Also run a ssl_setup self-test and log the exact error code so
     // we can identify the root cause if the problem persists.
+    //
+    // Results are written to mbedtls_diag.txt in the config dir (Android/data
+    // /cn.xfangfang.wiliwili/files/wiliwili/) so they can be inspected without
+    // adb logcat — just open the file from a file manager.
     {
+        std::string diagPath = getConfigDir() + "/mbedtls_diag.txt";
+        FILE* diag = fopen(diagPath.c_str(), "w");
+        auto diagLog = [&](const char* fmt, ...) {
+            char buf[512];
+            va_list ap;
+            va_start(ap, fmt);
+            vsnprintf(buf, sizeof(buf), fmt, ap);
+            va_end(ap);
+            brls::Logger::info("mbedtls: {}", buf);
+            if (diag) { fprintf(diag, "%s\n", buf); fflush(diag); }
+        };
+        if (!diag) {
+            brls::Logger::error("mbedtls: cannot open diag file: {}", diagPath);
+        } else {
+            fprintf(diag, "=== wiliwili mbedtls diagnostic ===\n");
+            fprintf(diag, "config dir: %s\n", getConfigDir().c_str());
+            fprintf(diag, "diag file:  %s\n", diagPath.c_str());
+        }
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
-        brls::Logger::info("mbedtls: MBEDTLS_USE_PSA_CRYPTO is DEFINED — calling psa_crypto_init()");
+        diagLog("MBEDTLS_USE_PSA_CRYPTO: DEFINED");
+        diagLog("calling psa_crypto_init() (curl 8.4.0 omits this)...");
         extern int psa_crypto_init(void);
         int psa_ret = psa_crypto_init();
-        brls::Logger::info("mbedtls: psa_crypto_init() returned: {}", psa_ret);
+        diagLog("psa_crypto_init() returned: %d (0=success)", psa_ret);
 #else
-        brls::Logger::info("mbedtls: MBEDTLS_USE_PSA_CRYPTO is NOT defined");
+        diagLog("MBEDTLS_USE_PSA_CRYPTO: NOT defined");
+        diagLog("TLS uses legacy mbedtls_md_* path (no PSA init needed)");
 #endif
         mbedtls_ssl_config ssl_conf;
         mbedtls_ssl_context ssl_ctx;
         mbedtls_ssl_config_init(&ssl_conf);
         mbedtls_ssl_init(&ssl_ctx);
+        diagLog("running ssl_setup self-test...");
         int ret = mbedtls_ssl_config_defaults(&ssl_conf, MBEDTLS_SSL_IS_CLIENT,
             MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
         if (ret != 0) {
             char errbuf[128] = {0};
             mbedtls_strerror(ret, errbuf, sizeof(errbuf));
-            brls::Logger::error("mbedtls: ssl_config_defaults failed: -0x{:04X} {}", -ret, errbuf);
+            diagLog("ssl_config_defaults FAILED: -0x%04X %s", -ret, errbuf);
         } else {
             ret = mbedtls_ssl_setup(&ssl_ctx, &ssl_conf);
             if (ret != 0) {
                 char errbuf[128] = {0};
                 mbedtls_strerror(ret, errbuf, sizeof(errbuf));
-                brls::Logger::error("mbedtls: ssl_setup failed: -0x{:04X} {}", -ret, errbuf);
+                diagLog("ssl_setup FAILED: -0x%04X %s", -ret, errbuf);
+                diagLog(">>> THIS IS THE ROOT CAUSE of 'mbedTLS: ssl_init failed' <<<");
             } else {
-                brls::Logger::info("mbedtls: ssl_setup OK — TLS should work");
+                diagLog("ssl_setup OK — TLS handshake layer is working");
             }
         }
         mbedtls_ssl_free(&ssl_ctx);
         mbedtls_ssl_config_free(&ssl_conf);
+        if (diag) {
+            fprintf(diag, "=== end diagnostic ===\n");
+            fclose(diag);
+            brls::Logger::info("mbedtls: diagnostic written to {}", diagPath);
+        }
     }
 #endif
     cpr::async::startup(THREAD_POOL_MIN_THREAD_NUM, THREAD_POOL_MAX_THREAD_NUM, std::chrono::milliseconds(5000));
