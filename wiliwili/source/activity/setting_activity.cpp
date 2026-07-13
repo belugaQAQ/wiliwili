@@ -195,7 +195,7 @@ void SettingActivity::onContentAvailable() {
 #if defined(__SWITCH__) || defined(__PSV__) || defined(PS4) || defined(__ANDROID__)
     btnOpenConfig->title->setText("wiliwili/setting/tools/others/config_dir"_i18n);
 #endif
-#ifdef __linux__
+#if defined(__linux__) && !defined(__ANDROID__)
     if (brls::isSteamDeck()) {
         btnOpenConfig->title->setText("wiliwili/setting/tools/others/config_dir"_i18n);
     }
@@ -206,7 +206,7 @@ void SettingActivity::onContentAvailable() {
 #if defined(__ANDROID__)
         // Android: cannot open file manager directly
 #elif !defined(__SWITCH__) && !defined(__PSV__) && !defined(PS4)
-#ifdef __linux__
+#if defined(__linux__) && !defined(__ANDROID__)
         if (!brls::isSteamDeck())
 #endif
         {
