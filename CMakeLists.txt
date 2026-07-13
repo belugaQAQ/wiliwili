@@ -248,17 +248,22 @@ if (PLATFORM_ANDROID)
     # Build SDL2 from source so borealis' find_library(SDL2) can locate it.
     # (borealis android-project does add_subdirectory(SDL) before borealis.)
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
-    add_subdirectory(${BOREALIS_LIBRARY}/lib/extern/SDL EXCLUDE_FROM_ALL)
+
     # SDL 2.28.5 still calls ALooper_pollAll, which NDK r24+ marks as
-    # __attribute__((unavailable)) → hard compile error. The clang diagnostic
-    # group is "availability" (confirmed by the compiler's own hint), so use
-    # -Wno-availability to let the old SDL source compile under NDK r29.
-    foreach(_t SDL2 SDL2-static)
-        if(TARGET ${_t})
-            target_compile_options(${_t} PRIVATE -Wno-availability)
-        endif()
-    endforeach()
-    unset(_t)
+    # __attribute__((unavailable)) → hard compile error that -Wno-availability
+    # cannot downgrade (unlike a normal diagnostic, the unavailable attribute
+    # is treated as an unconditional error). Rewrite the call to the
+    # recommended replacement ALooper_pollOnce (same signature) before adding
+    # the SDL subdirectory so the bundled source compiles under NDK r29.
+    set(_sdl_sensor "${BOREALIS_LIBRARY}/lib/extern/SDL/src/sensor/android/SDL_androidsensor.c")
+    if (EXISTS "${_sdl_sensor}")
+        file(READ "${_sdl_sensor}" _sdl_sensor_src)
+        string(REPLACE "ALooper_pollAll" "ALooper_pollOnce" _sdl_sensor_src "${_sdl_sensor_src}")
+        file(WRITE "${_sdl_sensor}" "${_sdl_sensor_src}")
+    endif ()
+    unset(_sdl_sensor _sdl_sensor_src)
+
+    add_subdirectory(${BOREALIS_LIBRARY}/lib/extern/SDL EXCLUDE_FROM_ALL)
 endif ()
 add_subdirectory(library)
 
