@@ -266,6 +266,16 @@ if (PLATFORM_ANDROID)
 
     add_subdirectory(${BOREALIS_LIBRARY}/lib/extern/SDL EXCLUDE_FROM_ALL)
 endif ()
+
+if (PLATFORM_ANDROID)
+    # curl 8.4.0 (fetched by cpr) uses fseeko in lib/formdata.c. On 32-bit
+    # ABIs (armeabi-v7a) NDK r29 does not expose fseeko unless
+    # _FILE_OFFSET_BITS=64 is defined before stdio.h is included. Define it
+    # globally before any subdirectory so curl, cpr and all third-party code
+    # see the large-file declarations consistently.
+    add_compile_definitions(_FILE_OFFSET_BITS=64)
+endif ()
+
 add_subdirectory(library)
 
 # Main Target
