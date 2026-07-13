@@ -524,9 +524,7 @@ void ProgramConfig::load() {
 
     // 初始化自定义手柄按键映射
 #ifdef IOS
-#elif defined(__ANDROID__)
-    brls::DesktopPlatform::GAMEPAD_DB = getConfigDir() + "/gamecontrollerdb.txt";
-#elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
+#elif defined(__APPLE__) || (defined(__linux__) && !defined(__ANDROID__)) || defined(_WIN32)
     brls::DesktopPlatform::GAMEPAD_DB = getConfigDir() + "/gamecontrollerdb.txt";
 #endif
 
