@@ -1177,15 +1177,19 @@ std::string ProgramConfig::getConfigDir() {
 #elif defined(__PSV__)
     return "ux0:/data/wiliwili";
 #elif defined(__ANDROID__)
-    // Android: use SDL's internal storage path API (provided by SDLActivity).
-    // Falls back to the package data dir constant if SDL is not ready yet.
+    // Android: use SDL's *external* storage path so the config dir ends up
+    // under /storage/emulated/0/Android/data/cn.xfangfang.wiliwili/files/wiliwili,
+    // which users can browse with a file manager. The internal storage path
+    // (/data/data/.../files) is hidden from users on non-rooted devices.
+    // External app-specific storage requires no runtime permission since
+    // API 19 and is auto-created on first write.
     {
-        const char* path = SDL_AndroidGetInternalStoragePath();
+        const char* path = SDL_AndroidGetExternalStoragePath();
         if (path && path[0]) {
             return std::string(path) + "/wiliwili";
         }
     }
-    return "/data/data/cn.xfangfang.wiliwili/files/wiliwili";
+    return "/sdcard/Android/data/cn.xfangfang.wiliwili/files/wiliwili";
 #elif defined(IOS)
     CFURLRef homeURL = CFCopyHomeDirectoryURL();
     if (homeURL != nullptr) {
