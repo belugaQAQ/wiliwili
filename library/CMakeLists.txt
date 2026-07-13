@@ -53,24 +53,27 @@ else ()
         # to the buildscripts prefix in the parent CMakeLists.txt). That
         # *should* work, but cpr passes the discovered vars down to curl's
         # FetchContent target, and the NDK's cross-root remapping can drop
-        # them. Set them explicitly here so both cpr and the fetched curl
-        # pick up the same headers and libraries — otherwise curl silently
-        # builds without a working TLS backend and every HTTPS call dies
-        # at runtime with "mbedTLS: ssl_init failed".
-        if (NOT MBEDTLS_FOUND)
-            find_path(MBEDTLS_INCLUDE_DIRS mbedtls/ssl.h)
-            find_library(MBEDTLS_LIBRARY mbedtls)
-            find_library(MBEDX509_LIBRARY mbedx509)
-            find_library(MBEDCRYPTO_LIBRARY mbedcrypto)
-            if (MBEDTLS_INCLUDE_DIRS AND MBEDTLS_LIBRARY AND MBEDX509_LIBRARY AND MBEDCRYPTO_LIBRARY)
-                set(MBEDTLS_LIBRARIES "${MBEDTLS_LIBRARY}" "${MBEDX509_LIBRARY}" "${MBEDCRYPTO_LIBRARY}")
-                set(MBEDTLS_FOUND TRUE CACHE BOOL "" FORCE)
-                message(STATUS "MbedTLS (pre-located for cpr/curl):")
-                message(STATUS "  includes: ${MBEDTLS_INCLUDE_DIRS}")
-                message(STATUS "  libs: ${MBEDTLS_LIBRARIES}")
-            else ()
-                message(FATAL_ERROR "MbedTLS not found in prefix — buildscripts must build mbedtls first")
-            endif ()
+        # them. Set them explicitly as CACHE variables so both cpr's and
+        # curl's find_package(MbedTLS) hit the cache and skip their own
+        # search — otherwise curl silently builds without a working TLS
+        # backend and every HTTPS call dies at runtime with
+        # "mbedTLS: ssl_init failed".
+        find_path(MBEDTLS_INCLUDE_DIRS mbedtls/ssl.h)
+        find_library(MBEDTLS_LIBRARY mbedtls)
+        find_library(MBEDX509_LIBRARY mbedx509)
+        find_library(MBEDCRYPTO_LIBRARY mbedcrypto)
+        if (MBEDTLS_INCLUDE_DIRS AND MBEDTLS_LIBRARY AND MBEDX509_LIBRARY AND MBEDCRYPTO_LIBRARY)
+            set(MBEDTLS_LIBRARIES "${MBEDTLS_LIBRARY}" "${MBEDX509_LIBRARY}" "${MBEDCRYPTO_LIBRARY}" CACHE STRING "" FORCE)
+            set(MBEDTLS_INCLUDE_DIRS "${MBEDTLS_INCLUDE_DIRS}" CACHE PATH "" FORCE)
+            set(MBEDTLS_LIBRARY "${MBEDTLS_LIBRARY}" CACHE FILEPATH "" FORCE)
+            set(MBEDX509_LIBRARY "${MBEDX509_LIBRARY}" CACHE FILEPATH "" FORCE)
+            set(MBEDCRYPTO_LIBRARY "${MBEDCRYPTO_LIBRARY}" CACHE FILEPATH "" FORCE)
+            set(MBEDTLS_FOUND TRUE CACHE BOOL "" FORCE)
+            message(STATUS "MbedTLS (pre-located for cpr/curl):")
+            message(STATUS "  includes: ${MBEDTLS_INCLUDE_DIRS}")
+            message(STATUS "  libs: ${MBEDTLS_LIBRARIES}")
+        else ()
+            message(FATAL_ERROR "MbedTLS not found in prefix — buildscripts must build mbedtls first")
         endif ()
     endif ()
     add_subdirectory(cpr EXCLUDE_FROM_ALL)
