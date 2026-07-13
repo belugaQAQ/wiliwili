@@ -230,6 +230,17 @@ endif ()
 
 # source cpp
 file(GLOB_RECURSE MAIN_SRC wiliwili/source/*.cpp)
+if (PLATFORM_ANDROID)
+    # borealis already provides brls::AndroidPlatform (inheriting SDLPlatform)
+    # under library/borealis/library/lib/platforms/android/. The files under
+    # wiliwili/source/platform/android/ are an older NativeActivity+EGL
+    # implementation that conflicts with the SDL2 backend (references
+    # android_native_app_glue.h which is not available, and redeclares
+    # brls::AndroidPlatform with a different, incompatible interface).
+    # Exclude them from the build on Android.
+    list(FILTER MAIN_SRC EXCLUDE REGEX
+         ".*/wiliwili/source/platform/android/.*\\.cpp$")
+endif ()
 if (WIN32)
     configure_file("${CMAKE_SOURCE_DIR}/wiliwili/app_win32.rc.in" "${CMAKE_BINARY_DIR}/app_win32.rc")
     list(APPEND MAIN_SRC ${CMAKE_BINARY_DIR}/app_win32.rc)
