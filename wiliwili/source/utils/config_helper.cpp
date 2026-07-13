@@ -222,7 +222,14 @@ std::unordered_map<SettingItem, ProgramOption> ProgramConfig::SETTING_MAP = {
      {"tls_verify",
       {},
       {},
-#if defined(__PSV__) || defined(__SWITCH__) || defined(PS4)
+#if defined(__PSV__) || defined(__SWITCH__) || defined(PS4) || defined(__ANDROID__)
+      // These platforms use curl's MbedTLS backend, which only supports
+      // CURLOPT_CAINFO (a single CA bundle file) — NOT CURLOPT_CAPATH
+      // (a directory of hashed certs). Android has no standard CA bundle
+      // file and the system cert directory (/system/etc/security/cacerts)
+      // can't be used by MbedTLS, so SSL verification fails for every
+      // HTTPS request and the app can't reach any API. Default to off;
+      // users who ship a CA bundle can re-enable it in Settings.
       0}},
 #else
       1}},

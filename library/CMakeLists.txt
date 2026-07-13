@@ -29,8 +29,13 @@ else ()
         # buildscripts does not build libcurl for Android, so use cpr's
         # built-in curl (FetchContent downloads curl 8.4.0) with the
         # MbedTLS backend (built by buildscripts and installed to prefix).
+        # MbedTLS only supports CURLOPT_CAINFO (single bundle file), not
+        # CURLOPT_CAPATH (hashed cert directory). Android has no standard
+        # CA bundle file, so skip the search and default TLS_VERIFY off
+        # (see config_helper.cpp); users who ship a bundle can re-enable it.
         set(CPR_USE_SYSTEM_CURL OFF)
         set(CPR_FORCE_MBEDTLS_BACKEND ON)
+        set(CPR_SKIP_CA_BUNDLE_SEARCH ON)
     endif ()
     add_subdirectory(cpr EXCLUDE_FROM_ALL)
 endif ()
