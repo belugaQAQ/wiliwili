@@ -69,8 +69,18 @@ jobs:
           # abiFilters otherwise forces both ABIs, but each job built one libmpv).
           ./gradlew assembleDebug -Pandroid.injected.build.abi=${{ matrix.abi }}
 
+      - name: Locate built APK
+        # AGP 8.7 with android.injected.build.abi may place the APK in a
+        # per-ABI subdirectory (e.g. apk/debug/<abi>/) rather than directly
+        # under apk/debug/. Print every *.apk under outputs/ so the upload
+        # step can be pointed at the real location.
+        run: |
+          echo "=== APK files under android/app/build/outputs ==="
+          find android/app/build/outputs -name '*.apk' -printf '%p (%s bytes)\n' 2>/dev/null || true
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: wiliwili-android-${{ matrix.abi }}
-          path: android/app/build/outputs/apk/debug/*.apk
+          # Recursive glob: matches apk/debug/*.apk AND apk/debug/<abi>/*.apk.
+          path: android/app/build/outputs/apk/**/*.apk
