@@ -18,5 +18,11 @@ else
 	./scripts/config.py set MBEDTLS_AESNI_C
 fi
 
-make -j$cores no_test
+# Build mbedtls as position-independent static libraries so they can be
+# linked into the final shared library (libwiliwili.so). Without -fPIC the
+# ARM linker fails with "relocation R_ARM_REL32 cannot be used ... recompile
+# with -fPIC" because the .a was compiled for a fixed load address.
+# Pass CFLAGS on the make command line so it takes precedence over any
+# CFLAGS baked into the mbedtls Makefile.
+make -j$cores no_test CFLAGS="${CFLAGS:-} -fPIC"
 make DESTDIR="$prefix_dir" install

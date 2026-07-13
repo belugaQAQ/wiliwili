@@ -179,8 +179,9 @@ elseif (PLATFORM_ANDROID)
     endif ()
 
     list(APPEND APP_PLATFORM_OPTION -D__ANDROID__)
-    # Android platform libs
-    list(APPEND APP_PLATFORM_LIB log android)
+    # Android platform libs: log/android (JNI + logcat), EGL/GLESv2 (GL context
+    # + GLES2 symbols used by nanovg and mpv render context).
+    list(APPEND APP_PLATFORM_LIB log android EGL GLESv2)
 else ()
     # Used for Cross Compile such as NintendoSwitch
     # If dependent files cannot be found, environment variables can be set before executing the cmake command:
