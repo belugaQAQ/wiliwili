@@ -9,6 +9,10 @@
 #include <SDL2/SDL.h>
 #include <mbedtls/ssl.h>
 #include <mbedtls/error.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
 #include <unistd.h>
 #include <borealis/platforms/desktop/desktop_platform.hpp>
