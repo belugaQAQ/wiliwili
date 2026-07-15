@@ -1121,6 +1121,72 @@ void ProgramConfig::init() {
         }
         mbedtls_ssl_free(&ssl_ctx);
         mbedtls_ssl_config_free(&ssl_conf);
+
+        // Test system DNS resolution first
+        diagLog("--- testing system DNS (getaddrinfo) ---");
+        struct addrinfo hints, *res = nullptr;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        int gai_ret = getaddrinfo("api.bilibili.com", "443", &hints, &res);
+        if (gai_ret != 0) {
+            diagLog("getaddrinfo FAILED: %s", gai_strerror(gai_ret));
+            diagLog(">>> System DNS resolution failed - device has no network <<<");
+        } else {
+            diagLog("getaddrinfo OK - system DNS working");
+            if (res) freeaddrinfo(res);
+        }
+
+        // Now test actual curl HTTPS request with verbose output
+        diagLog("--- testing curl HTTPS request ---");
+        CURL* curl = curl_easy_init();
+        if (curl) {
+            // Open separate file for curl verbose output
+            std::string curlVerbosePath = getConfigDir() + "/curl_verbose.txt";
+            FILE* curlVerbose = fopen(curlVerbosePath.c_str(), "w");
+            diagLog("curl verbose output: %s", curlVerbosePath.c_str());
+
+            curl_easy_setopt(curl, CURLOPT_URL, "https://api.bilibili.com/x/web-interface/nav");
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+            curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+            // Write verbose output to separate file
+            curl_easy_setopt(curl, CURLOPT_STDERR, curlVerbose);
+            // Write response to diag file
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, diag);
+            // Use a write callback that writes to diag file
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                +[](char* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
+                    FILE* f = (FILE*)userdata;
+                    if (f) fwrite(ptr, size, nmemb, f);
+                    return size * nmemb;
+                });
+            // Set connection timeout to avoid hanging
+            curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+
+            CURLcode res = curl_easy_perform(curl);
+            diagLog("curl_easy_perform returned: %d (%s)", (int)res, curl_easy_strerror(res));
+            if (res != CURLE_OK) {
+                diagLog(">>> curl HTTPS request FAILED - this is the real error <<<");
+                // Log additional curl info
+                long os_errno = 0;
+                curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &os_errno);
+                if (os_errno != 0) {
+                    diagLog("OS errno: %ld", os_errno);
+                }
+            } else {
+                long http_code = 0;
+                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+                diagLog("HTTP response code: %ld", http_code);
+                diagLog(">>> curl HTTPS request OK - network is working <<<");
+            }
+            curl_easy_cleanup(curl);
+            if (curlVerbose) fclose(curlVerbose);
+        } else {
+            diagLog("curl_easy_init() returned NULL");
+        }
+
         if (diag) {
             fprintf(diag, "=== end diagnostic ===\n");
             fclose(diag);
