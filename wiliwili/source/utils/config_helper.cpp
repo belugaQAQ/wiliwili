@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <ifaddrs.h>
 #elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
 #include <unistd.h>
 #include <borealis/platforms/desktop/desktop_platform.hpp>
@@ -1126,6 +1127,30 @@ void ProgramConfig::init() {
         }
         mbedtls_ssl_free(&ssl_ctx);
         mbedtls_ssl_config_free(&ssl_conf);
+
+        // Test network interfaces
+        diagLog("--- testing network interfaces ---");
+        {
+            struct ifaddrs* ifaddr = nullptr;
+            if (getifaddrs(&ifaddr) == 0) {
+                for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+                    if (ifa->ifa_addr == nullptr) continue;
+                    int family = ifa->ifa_addr->sa_family;
+                    if (family == AF_INET || family == AF_INET6) {
+                        char host[NI_MAXHOST];
+                        int s = getnameinfo(ifa->ifa_addr,
+                            (family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
+                            host, NI_MAXHOST, nullptr, 0, NI_NUMERICHOST);
+                        if (s == 0) {
+                            diagLog("  interface %s: %s (flags=0x%x)", ifa->ifa_name, host, ifa->ifa_flags);
+                        }
+                    }
+                }
+                freeifaddrs(ifaddr);
+            } else {
+                diagLog("getifaddrs failed: %s", strerror(errno));
+            }
+        }
 
         // Test raw socket connection (bypass curl)
         diagLog("--- testing raw socket connection ---");
