@@ -37,6 +37,19 @@ else ()
         set(CPR_FORCE_MBEDTLS_BACKEND ON)
         set(CPR_SKIP_CA_BUNDLE_SEARCH ON)
 
+        # Override curl version to 8.6.0 to fix mbedTLS RNG initialization issue.
+        # curl 8.4.0 does not properly initialize the RNG callback for mbedTLS,
+        # causing "ssl_setup FAILED: -0x7400 SSL - No RNG was provided to the SSL module".
+        # This was fixed in curl 8.6.0 (commit 8bc5d0f).
+        # We use FetchContent_Declare to override cpr's curl declaration
+        # (first declaration wins in CMake FetchContent).
+        include(FetchContent)
+        FetchContent_Declare(curl
+            GIT_REPOSITORY https://github.com/curl/curl.git
+            GIT_TAG curl-8_6_0
+            GIT_SHALLOW TRUE
+        )
+
         # Force threaded resolver ON for curl. Although curl's CMakeLists
         # defaults ENABLE_THREADED_RESOLVER to ON when ENABLE_ARES is OFF,
         # the dependent_option can be silently disabled if Threads detection
