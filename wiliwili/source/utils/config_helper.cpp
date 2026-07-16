@@ -1152,21 +1152,6 @@ void ProgramConfig::init() {
             }
         }
 
-        // Test system DNS resolution first
-        diagLog("--- testing system DNS (getaddrinfo) ---");
-        struct addrinfo hints, *res = nullptr;
-        memset(&hints, 0, sizeof(hints));
-        hints.ai_family = AF_UNSPEC;
-        hints.ai_socktype = SOCK_STREAM;
-        int gai_ret = getaddrinfo("api.bilibili.com", "443", &hints, &res);
-        if (gai_ret != 0) {
-            diagLog("getaddrinfo FAILED: %s", gai_strerror(gai_ret));
-            diagLog(">>> System DNS resolution failed - device has no network <<<");
-        } else {
-            diagLog("getaddrinfo OK - system DNS working");
-            if (res) freeaddrinfo(res);
-        }
-
         // Now test actual curl HTTPS request with verbose output
         diagLog("--- testing curl HTTPS request ---");
         CURL* curl = curl_easy_init();
