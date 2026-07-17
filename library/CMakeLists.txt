@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 3.15)
 
 # add cpr
-if (USE_SYSTEM_CPR)
+if (PLATFORM_ANDROID)
+    # Android uses OkHttp via JNI instead of cpr/curl/mbedtls (the NDK-built
+    # curl 8.4.0 mbedTLS backend fails every HTTPS request with
+    # "ssl_init failed" / -0x7400 No RNG). Drop-in shim headers in
+    # wiliwili/include/android_shim/ shadow <cpr/cpr.h>, <cpr/filesystem.h>
+    # and <curl/curl.h> for the Android build (that directory is added to
+    # the include path in the top-level CMakeLists.txt). cpr::cpr is NOT
+    # linked on Android — wiliwiliLibExtra (below) skips it.
+elseif (USE_SYSTEM_CPR)
     find_package(cpr CONFIG REQUIRED)
     if (cpr_FOUND)
         message(STATUS "Found cpr: ${cpr_CONFIG} (found version ${cpr_VERSION})")
@@ -95,10 +103,8 @@ if (PLATFORM_PS4)
     list(APPEND APP_PLATFORM_LIB SceNet mbedcrypto mbedtls mbedx509)
     set(APP_PLATFORM_LIB ${APP_PLATFORM_LIB} PARENT_SCOPE)
 endif ()
-if (PLATFORM_ANDROID)
-    list(APPEND APP_PLATFORM_LIB mbedcrypto mbedtls mbedx509 log)
-    set(APP_PLATFORM_LIB ${APP_PLATFORM_LIB} PARENT_SCOPE)
-endif ()
+# Note: Android no longer links mbedtls (OkHttp uses Android platform TLS).
+# log is added by the top-level CMakeLists.txt Android block.
 
 # add libopencc
 if (NOT USE_LIBROMFS AND NOT DISABLE_OPENCC AND NOT PLATFORM_IOS)
@@ -188,4 +194,7 @@ target_include_directories(pdr PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libpdr/include
 target_link_libraries(pdr mongoose tinyxml2)
 
 add_library(wiliwiliLibExtra INTERFACE)
-target_link_libraries(wiliwiliLibExtra INTERFACE cpr::cpr qrcode)
+if (NOT PLATFORM_ANDROID)
+    target_link_libraries(wiliwiliLibExtra INTERFACE cpr::cpr)
+endif ()
+target_link_libraries(wiliwiliLibExtra INTERFACE qrcode)

@@ -170,12 +170,13 @@ elseif (PLATFORM_ANDROID)
     list(APPEND APP_PLATFORM_INCLUDE ${MPV_INCLUDE_DIR})
     list(APPEND APP_PLATFORM_LIB ${MPV_LIBRARY})
 
-    # Add mbedtls headers so config_helper.cpp can run a startup SSL
-    # self-test (prints the exact error code behind "ssl_init failed").
-    find_path(MBEDTLS_INCLUDE_DIR mbedtls/ssl.h)
-    if (MBEDTLS_INCLUDE_DIR)
-        list(APPEND APP_PLATFORM_INCLUDE ${MBEDTLS_INCLUDE_DIR})
-    endif ()
+    # Add the cpr/curl drop-in shim headers so wiliwili source files that
+    # include <cpr/cpr.h>, <cpr/filesystem.h> or <curl/curl.h> resolve to
+    # the OkHttp-backed shim instead of the real (unbuilt) cpr/curl. On
+    # Android no other cpr/curl headers exist in the search path (cpr is
+    # not added via add_subdirectory, see library/CMakeLists.txt), so the
+    # shim is the only match.
+    list(APPEND APP_PLATFORM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/wiliwili/include/android_shim)
 
     find_package(WebP)
     if (WebP_FOUND AND NOT DISABLE_WEBP)
@@ -288,18 +289,6 @@ if (PLATFORM_ANDROID)
     unset(_sdl_sensor_src)
 
     add_subdirectory(${BOREALIS_LIBRARY}/lib/extern/SDL EXCLUDE_FROM_ALL)
-endif ()
-
-if (PLATFORM_ANDROID)
-    # curl 8.4.0 (fetched by cpr) calls fseeko/ftello in lib/formdata.c.
-    # NDK r29's bionic on the 32-bit armeabi-v7a ABI does not declare
-    # fseeko/ftello in a way curl's check_symbol_exists probe accepts, so
-    # curl keeps calling them unguarded and the build fails.
-    # HAVE_FSEEKO=OFF did not help because curl's own check_symbol_exists
-    # overwrites the cache var. Instead, define fseeko/ftello as macros
-    # aliasing the always-available fseek/ftell at the preprocessor level,
-    # so every curl source file that calls fseeko/ftello compiles cleanly.
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FILE_OFFSET_BITS=64 -Dfseeko=fseek -Dftello=ftell" CACHE STRING "" FORCE)
 endif ()
 
 add_subdirectory(library)
