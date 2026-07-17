@@ -5,7 +5,11 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
+#ifndef __ANDROID__
 #include <cpr/cpr.h>
+#else
+#include "utils/http_bridge.hpp"
+#endif
 
 #include "bilibili/util/md5.hpp"
 #include "bilibili/util/json.hpp"

@@ -252,6 +252,13 @@ if (PLATFORM_ANDROID)
     # Exclude them from the build on Android.
     list(FILTER MAIN_SRC EXCLUDE REGEX
          ".*/wiliwili/source/platform/android/.*\\.cpp$")
+    # Exclude cpr-based HTTP bridge on Android (use OkHttp via JNI instead)
+    list(FILTER MAIN_SRC EXCLUDE REGEX
+         ".*/wiliwili/source/utils/http_bridge_cpr\\.cpp$")
+else ()
+    # Exclude Android JNI-based HTTP bridge on non-Android platforms
+    list(FILTER MAIN_SRC EXCLUDE REGEX
+         ".*/wiliwili/source/utils/http_bridge_android\\.cpp$")
 endif ()
 if (WIN32)
     configure_file("${CMAKE_SOURCE_DIR}/wiliwili/app_win32.rc.in" "${CMAKE_BINARY_DIR}/app_win32.rc")

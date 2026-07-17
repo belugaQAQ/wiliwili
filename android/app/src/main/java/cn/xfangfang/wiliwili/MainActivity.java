@@ -14,6 +14,8 @@ public class MainActivity extends SDLActivity {
         super.onCreate(savedInstanceState);
         // Receive brightness changes from borealis native code
         PlatformUtils.borealisHandler = new BorealisHandler();
+        // Initialize HTTP bridge for native code (uses OkHttp on Android)
+        HttpBridge.init();
     }
 
     @Override
