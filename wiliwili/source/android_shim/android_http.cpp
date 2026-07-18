@@ -10,24 +10,9 @@
 
 #include <jni.h>
 
-#include <cstdarg>
 #include <cstring>
 
 #ifdef __ANDROID__
-
-// Startup file logger — defined in main.cpp. Mirrors JNI HTTP calls into
-// /sdcard/wiliwili_startup.log so a crash inside the JNI path leaves a
-// trace (logcat is empty on this device). TEMP diagnostic.
-extern FILE* g_wiliwiliStartupLog;
-static void startupLog(const char* fmt, ...) {
-    if (!g_wiliwiliStartupLog) return;
-    va_list ap;
-    va_start(ap, fmt);
-    std::vfprintf(g_wiliwiliStartupLog, fmt, ap);
-    va_end(ap);
-    std::fputc('\n', g_wiliwiliStartupLog);
-    std::fflush(g_wiliwiliStartupLog);
-}
 
 // SDL2 provides this on Android; it returns the JNIEnv* for the current
 // thread (attaching it if necessary). Declared here to avoid pulling in
@@ -68,25 +53,15 @@ bool ensureCache() {
     JniCache& c = cache();
     if (c.initialized) return c.ok;
     c.initialized = true;
-    startupLog("ensureCache: begin");
 
     JNIEnv* env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
-    if (!env) {
-        startupLog("ensureCache: SDL_AndroidGetJNIEnv returned null");
-        return false;
-    }
-    startupLog("ensureCache: got JNIEnv=%p", (void*)env);
+    if (!env) return false;
 
     // HttpClient class + static methods.
     jclass local = env->FindClass("cn/xfangfang/wiliwili/HttpClient");
-    if (!local) {
-        startupLog("ensureCache: FindClass HttpClient FAILED");
-        if (env->ExceptionCheck()) env->ExceptionClear();
-        return false;
-    }
+    if (!local) return false;
     c.httpClientClass = static_cast<jclass>(env->NewGlobalRef(local));
     env->DeleteLocalRef(local);
-    startupLog("ensureCache: HttpClient class ok");
 
     c.getMethod = env->GetStaticMethodID(
         c.httpClientClass, "get",
@@ -101,21 +76,11 @@ bool ensureCache() {
         c.httpClientClass, "postRaw",
         "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)"
         "Lcn/xfangfang/wiliwili/HttpResponse;");
-    if (!c.getMethod || !c.postMethod || !c.postRawMethod) {
-        startupLog("ensureCache: GetStaticMethodID FAILED get=%p post=%p postRaw=%p",
-                   (void*)c.getMethod, (void*)c.postMethod, (void*)c.postRawMethod);
-        if (env->ExceptionCheck()) env->ExceptionClear();
-        return false;
-    }
-    startupLog("ensureCache: method IDs ok");
+    if (!c.getMethod || !c.postMethod || !c.postRawMethod) return false;
 
     // HttpResponse class + instance fields.
     local = env->FindClass("cn/xfangfang/wiliwili/HttpResponse");
-    if (!local) {
-        startupLog("ensureCache: FindClass HttpResponse FAILED");
-        if (env->ExceptionCheck()) env->ExceptionClear();
-        return false;
-    }
+    if (!local) return false;
     c.httpResponseClass = static_cast<jclass>(env->NewGlobalRef(local));
     env->DeleteLocalRef(local);
 
@@ -125,14 +90,9 @@ bool ensureCache() {
     c.textField = env->GetFieldID(c.httpResponseClass, "text", "Ljava/lang/String;");
     c.errorField = env->GetFieldID(c.httpResponseClass, "error", "Ljava/lang/String;");
     c.setCookiesField = env->GetFieldID(c.httpResponseClass, "setCookies", "[Ljava/lang/String;");
-    if (!c.codeField || !c.bodyField || !c.textField || !c.errorField) {
-        startupLog("ensureCache: GetFieldID FAILED");
-        if (env->ExceptionCheck()) env->ExceptionClear();
-        return false;
-    }
+    if (!c.codeField || !c.bodyField || !c.textField || !c.errorField) return false;
 
     c.ok = true;
-    startupLog("ensureCache: OK");
     return true;
 }
 
@@ -245,16 +205,13 @@ AndroidHttpResponse AndroidHttp::get(const std::string& url,
                                      const std::map<std::string, std::string>& headers,
                                      const std::string& cookie) {
     AndroidHttpResponse out;
-    startupLog("AndroidHttp::get: url=%s", url.c_str());
     if (!ensureCache()) {
         out.error = "JNI cache init failed";
-        startupLog("AndroidHttp::get: ensureCache failed");
         return out;
     }
     JNIEnv* env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
     if (!env) {
         out.error = "no JNIEnv";
-        startupLog("AndroidHttp::get: no JNIEnv");
         return out;
     }
 
@@ -270,9 +227,7 @@ AndroidHttpResponse AndroidHttp::get(const std::string& url,
     jstring jcookie = env->NewStringUTF(cookie.c_str());
     jobjectArray hKeys = toJStringArray(env, keys);
     jobjectArray hVals = toJStringArray(env, vals);
-    startupLog("AndroidHttp::get: calling Java HttpClient.get");
     out = call(env, cache().getMethod, jurl, hKeys, hVals, nullptr, nullptr, jcookie);
-    startupLog("AndroidHttp::get: done status=%d err=%s", out.status_code, out.error.c_str());
     env->DeleteLocalRef(jurl);
     env->DeleteLocalRef(jcookie);
     env->DeleteLocalRef(hKeys);
@@ -285,10 +240,8 @@ AndroidHttpResponse AndroidHttp::post(const std::string& url,
                                       const std::map<std::string, std::string>& headers,
                                       const std::string& cookie) {
     AndroidHttpResponse out;
-    startupLog("AndroidHttp::post: url=%s", url.c_str());
     if (!ensureCache()) {
         out.error = "JNI cache init failed";
-        startupLog("AndroidHttp::post: ensureCache failed");
         return out;
     }
     JNIEnv* env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());

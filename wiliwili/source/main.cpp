@@ -19,41 +19,7 @@
 #include <SDL2/SDL_main.h>
 #endif
 
-// --- Android startup file logger (TEMP diagnostic) ------------------------
-// logcat shows nothing when the app dies on launch, so mirror every step
-// (and every JNI HTTP call, see android_http.cpp) to a file on /sdcard that
-// survives the crash. Removed once the startup crash is fixed.
-#ifdef __ANDROID__
-#include <cstdarg>
-FILE* g_wiliwiliStartupLog = nullptr;
-void startupLog(const char* fmt, ...) {
-    if (!g_wiliwiliStartupLog) return;
-    va_list ap;
-    va_start(ap, fmt);
-    std::vfprintf(g_wiliwiliStartupLog, fmt, ap);
-    va_end(ap);
-    std::fputc('\n', g_wiliwiliStartupLog);
-    std::fflush(g_wiliwiliStartupLog);
-}
-#else
-void startupLog(const char* /*fmt*/, ...) {}
-#endif
-
 int main(int argc, char* argv[]) {
-#ifdef __ANDROID__
-    // Open the startup log BEFORE anything else so a crash anywhere below
-    // still leaves a partial trace. /sdcard is world-writable on app
-    // external storage; if fopen fails we just skip logging.
-    g_wiliwiliStartupLog = std::fopen("/sdcard/wiliwili_startup.log", "w");
-    startupLog("=== wiliwili startup %ld ===", (long)std::time(nullptr));
-    startupLog("main() enter");
-    // Also redirect brls::Logger into the same file so all brls logs survive.
-    if (g_wiliwiliStartupLog) {
-        brls::Logger::setLogOutput(g_wiliwiliStartupLog);
-        brls::Logger::setLogLevel(brls::LogLevel::LOG_DEBUG);
-    }
-#endif
-
     for (int i = 1; i < argc; i++) {
         if (std::strcmp(argv[i], "-d") == 0) {
             brls::Logger::setLogLevel(brls::LogLevel::LOG_DEBUG);
@@ -68,40 +34,28 @@ int main(int argc, char* argv[]) {
     }
 
     // Load cookies and settings
-    startupLog("ProgramConfig::init() begin");
     ProgramConfig::instance().init();
-    startupLog("ProgramConfig::init() done");
 
     // Init the app and i18n
-    startupLog("brls::Application::init() begin");
     if (!brls::Application::init()) {
         brls::Logger::error("Unable to init application");
-        startupLog("brls::Application::init() FAILED");
         return EXIT_FAILURE;
     }
-    startupLog("brls::Application::init() done");
 
     // Return directly to the desktop when closing the application (only for NX)
     brls::Application::getPlatform()->exitToHomeMode(true);
 
-    startupLog("createWindow begin");
     brls::Application::createWindow("wiliwili");
     brls::Logger::info("createWindow done");
-    startupLog("createWindow done");
 
     // Register custom view\theme\style
-    startupLog("Register::initCustomView() begin");
     Register::initCustomView();
-    startupLog("Register::initCustomTheme() begin");
     Register::initCustomTheme();
-    startupLog("Register::initCustomStyle() begin");
     Register::initCustomStyle();
-    startupLog("Register init done");
 
     brls::Application::getPlatform()->disableScreenDimming(false);
 
     if (brls::Application::getPlatform()->isApplicationMode()) {
-        startupLog("Intent::openMain() begin");
         Intent::openMain();
         // Uncomment these lines to debug activities
         //        Intent::openBV("BV1Da411Y7U4");  // 弹幕防遮挡 (横屏)
@@ -138,7 +92,6 @@ int main(int argc, char* argv[]) {
                     {"language", brls::Application::getLocale()},
                     {"window", fmt::format("{}x{}", brls::Application::windowWidth, brls::Application::windowHeight)}})
     APPVersion::instance().checkUpdate();
-    startupLog("entering mainLoop");
 
     // Run the app
     // brls::Application::setLimitedFPS(60);
