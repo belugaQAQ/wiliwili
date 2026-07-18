@@ -8,6 +8,8 @@
 
 #include "platform/android_http.hpp"
 
+#include <jni.h>
+
 #include <cstring>
 
 #ifdef __ANDROID__
