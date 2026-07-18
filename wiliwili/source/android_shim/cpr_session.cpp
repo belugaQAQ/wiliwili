@@ -37,7 +37,7 @@ struct Session::Config {
     std::int64_t connectTimeoutMs{0};
     Proxies proxies;
     bool verifySsl{false};
-    CurlHolder curlHolder;
+    std::shared_ptr<CurlHolder> curlHolder{std::make_shared<CurlHolder>()};
 };
 
 Session::Session() : config_(std::make_shared<Config>()) {}
@@ -60,7 +60,7 @@ void Session::SetProgressCallback(const ProgressCallback&) {
     // ImageHelper checks isCancel before and after the request.
 }
 
-CurlHolder& Session::GetCurlHolder() { return config_->curlHolder; }
+std::shared_ptr<CurlHolder> Session::GetCurlHolder() { return config_->curlHolder; }
 
 Response Session::doRequest(const Config& cfg, bool isPost) {
     Response r;

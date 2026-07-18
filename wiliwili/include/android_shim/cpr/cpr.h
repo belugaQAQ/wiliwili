@@ -326,7 +326,11 @@ public:
     void SetBody(const Body& b);
     void SetRange(const Range& r);
 
-    CurlHolder& GetCurlHolder();
+    // Returns a shared_ptr (not a reference) so callers can write
+    // `session->GetCurlHolder()->handle` as they do with real cpr (real cpr
+    // returns std::shared_ptr<CurlHolder> here). The handle is an inert
+    // dummy on Android; curl_easy_setopt on it is a no-op (curl/curl.h).
+    std::shared_ptr<CurlHolder> GetCurlHolder();
 
     Response Get();
     // Templated so callers may write GetCallback<>(...) (matches real cpr).
