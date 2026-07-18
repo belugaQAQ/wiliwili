@@ -10,6 +10,7 @@
 
 #include <jni.h>
 
+#include <cstdio>
 #include <cstring>
 
 #ifdef __ANDROID__
@@ -19,6 +20,11 @@
 // SDL_system.h, whose include path is set up by the borealis SDL2 target
 // and is not guaranteed to be visible to every wiliwili TU.
 extern "C" void* SDL_AndroidGetJNIEnv(void);
+
+// File-backed boot tracer (defined in crash_helper.cpp). Lets us see
+// whether ensureCache() succeeds and which JNI step fails, even when
+// logcat is unavailable.
+extern "C" void wiliwili_logf(const char* msg);
 
 namespace bilibili {
 namespace {
@@ -54,14 +60,25 @@ bool ensureCache() {
     if (c.initialized) return c.ok;
     c.initialized = true;
 
+    wiliwili_logf("[http] ensureCache: starting JNI init");
+
     JNIEnv* env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
-    if (!env) return false;
+    if (!env) {
+        wiliwili_logf("[http] ensureCache FAILED: SDL_AndroidGetJNIEnv returned null");
+        return false;
+    }
+    wiliwili_logf("[http] ensureCache: got JNIEnv");
 
     // HttpClient class + static methods.
     jclass local = env->FindClass("cn/xfangfang/wiliwili/HttpClient");
-    if (!local) return false;
+    if (!local) {
+        wiliwili_logf("[http] ensureCache FAILED: FindClass(HttpClient) returned null");
+        if (env->ExceptionCheck()) env->ExceptionClear();
+        return false;
+    }
     c.httpClientClass = static_cast<jclass>(env->NewGlobalRef(local));
     env->DeleteLocalRef(local);
+    wiliwili_logf("[http] ensureCache: found HttpClient class");
 
     c.getMethod = env->GetStaticMethodID(
         c.httpClientClass, "get",
@@ -76,11 +93,20 @@ bool ensureCache() {
         c.httpClientClass, "postRaw",
         "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)"
         "Lcn/xfangfang/wiliwili/HttpResponse;");
-    if (!c.getMethod || !c.postMethod || !c.postRawMethod) return false;
+    if (!c.getMethod || !c.postMethod || !c.postRawMethod) {
+        wiliwili_logf("[http] ensureCache FAILED: GetStaticMethodID returned null for one of get/post/postRaw");
+        if (env->ExceptionCheck()) env->ExceptionClear();
+        return false;
+    }
+    wiliwili_logf("[http] ensureCache: found get/post/postRaw methods");
 
     // HttpResponse class + instance fields.
     local = env->FindClass("cn/xfangfang/wiliwili/HttpResponse");
-    if (!local) return false;
+    if (!local) {
+        wiliwili_logf("[http] ensureCache FAILED: FindClass(HttpResponse) returned null");
+        if (env->ExceptionCheck()) env->ExceptionClear();
+        return false;
+    }
     c.httpResponseClass = static_cast<jclass>(env->NewGlobalRef(local));
     env->DeleteLocalRef(local);
 
@@ -90,9 +116,14 @@ bool ensureCache() {
     c.textField = env->GetFieldID(c.httpResponseClass, "text", "Ljava/lang/String;");
     c.errorField = env->GetFieldID(c.httpResponseClass, "error", "Ljava/lang/String;");
     c.setCookiesField = env->GetFieldID(c.httpResponseClass, "setCookies", "[Ljava/lang/String;");
-    if (!c.codeField || !c.bodyField || !c.textField || !c.errorField) return false;
+    if (!c.codeField || !c.bodyField || !c.textField || !c.errorField) {
+        wiliwili_logf("[http] ensureCache FAILED: GetFieldID returned null for a HttpResponse field");
+        if (env->ExceptionCheck()) env->ExceptionClear();
+        return false;
+    }
 
     c.ok = true;
+    wiliwili_logf("[http] ensureCache OK: JNI cache fully initialized");
     return true;
 }
 

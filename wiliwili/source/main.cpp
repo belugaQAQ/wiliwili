@@ -19,7 +19,20 @@
 #include <SDL2/SDL_main.h>
 #endif
 
+#ifdef __ANDROID__
+// File-backed boot tracer (defined in crash_helper.cpp). Writes to
+// wiliwili_startup.log under Android external app-specific storage so the
+// boot sequence can be inspected without adb logcat.
+extern "C" void wiliwili_logf(const char* msg);
+#define BOOT_LOG(msg) wiliwili_logf(msg)
+#else
+#define BOOT_LOG(msg) (void)(msg)
+#endif
+
 int main(int argc, char* argv[]) {
+#ifdef __ANDROID__
+    BOOT_LOG("[main] entered main()");
+#endif
     for (int i = 1; i < argc; i++) {
         if (std::strcmp(argv[i], "-d") == 0) {
             brls::Logger::setLogLevel(brls::LogLevel::LOG_DEBUG);
@@ -32,30 +45,43 @@ int main(int argc, char* argv[]) {
             brls::Logger::setLogOutput(std::fopen(path, "w+"));
         }
     }
+#ifdef __ANDROID__
+    BOOT_LOG("[main] args parsed");
+#endif
 
     // Load cookies and settings
+    BOOT_LOG("[main] -> ProgramConfig::init()");
     ProgramConfig::instance().init();
+    BOOT_LOG("[main] <- ProgramConfig::init() done");
 
     // Init the app and i18n
+    BOOT_LOG("[main] -> brls::Application::init()");
     if (!brls::Application::init()) {
         brls::Logger::error("Unable to init application");
+        BOOT_LOG("[main] FATAL: brls::Application::init() failed");
         return EXIT_FAILURE;
     }
+    BOOT_LOG("[main] <- brls::Application::init() done");
 
     // Return directly to the desktop when closing the application (only for NX)
     brls::Application::getPlatform()->exitToHomeMode(true);
 
+    BOOT_LOG("[main] -> createWindow");
     brls::Application::createWindow("wiliwili");
     brls::Logger::info("createWindow done");
+    BOOT_LOG("[main] <- createWindow done");
 
     // Register custom view\theme\style
+    BOOT_LOG("[main] -> Register::initCustomView/Theme/Style");
     Register::initCustomView();
     Register::initCustomTheme();
     Register::initCustomStyle();
+    BOOT_LOG("[main] <- Register init done");
 
     brls::Application::getPlatform()->disableScreenDimming(false);
 
     if (brls::Application::getPlatform()->isApplicationMode()) {
+        BOOT_LOG("[main] -> Intent::openMain()");
         Intent::openMain();
         // Uncomment these lines to debug activities
         //        Intent::openBV("BV1Da411Y7U4");  // 弹幕防遮挡 (横屏)
@@ -85,13 +111,16 @@ int main(int argc, char* argv[]) {
         //        Intent::openPgcFilter("/page/home/pgc/more?type=2&index_type=2&area=2&order=2&season_status=-1&season_status=3,6"); // 影片分类索引
         //        Intent::openSetting();  //  设置页面
     } else {
+        BOOT_LOG("[main] -> Intent::openHint()");
         Intent::openHint();
     }
 
+    BOOT_LOG("[main] -> GA + checkUpdate");
     GA("open_app", {{"version", APPVersion::instance().getVersionStr()},
                     {"language", brls::Application::getLocale()},
                     {"window", fmt::format("{}x{}", brls::Application::windowWidth, brls::Application::windowHeight)}})
     APPVersion::instance().checkUpdate();
+    BOOT_LOG("[main] <- GA + checkUpdate done, entering mainLoop");
 
     // Run the app
     // brls::Application::setLimitedFPS(60);
