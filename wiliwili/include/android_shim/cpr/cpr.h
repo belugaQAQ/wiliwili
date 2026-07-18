@@ -418,6 +418,9 @@ public:
     void Start();
     void Stop();
     void Submit(const std::function<void()>& fn);
+    // Public because wiliwili's ImageThreadPool::setRequestThreads writes
+    // both directly (image_helper.cpp:334). Real cpr also exposes these.
+    std::size_t min_thread_num{0};
     std::size_t max_thread_num{0};
 private:
     void worker();

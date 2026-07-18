@@ -166,7 +166,8 @@ std::vector<Response> MultiPerform::Get() {
 // ---------------------------------------------------------------------------
 ThreadPool::ThreadPool(std::size_t min_threads, std::size_t max_threads,
                        std::chrono::milliseconds timeout)
-    : max_thread_num(max_threads),
+    : min_thread_num(min_threads),
+      max_thread_num(max_threads),
       min_threads_(min_threads),
       timeout_(timeout) {}
 
