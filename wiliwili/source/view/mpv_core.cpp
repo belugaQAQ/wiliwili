@@ -1173,14 +1173,37 @@ void MPVCore::reset() {
 }
 
 void MPVCore::setUrl(const std::string &url, const std::string &extra, const std::string &method) {
-    brls::Logger::debug("{} Url: {}, extra: {}", method, url, extra);
-    if (extra.empty()) {
-        command_async("loadfile", url, method);
+    std::string finalUrl = url;
+    std::string finalExtra = extra;
+#ifdef __ANDROID__
+    // On Android, mpv's statically-linked mbedTLS backend has an RNG
+    // initialization bug (curl 8.4.0: -0x7400 "No RNG was provided to the
+    // SSL module"), so every HTTPS stream fails to load and the video
+    // shows a green screen. B站 video/audio CDNs serve the same content
+    // over plain HTTP, so downgrade https:// to http:// in both the main
+    // URL and the EDL extra params (which embed audio-file URLs). This
+    // requires android:usesCleartextTraffic="true" in AndroidManifest.xml.
+    {
+        const std::string from = "https://";
+        const std::string to   = "http://";
+        for (size_t pos = 0; (pos = finalUrl.find(from, pos)) != std::string::npos;) {
+            finalUrl.replace(pos, from.size(), to);
+            pos += to.size();
+        }
+        for (size_t pos = 0; (pos = finalExtra.find(from, pos)) != std::string::npos;) {
+            finalExtra.replace(pos, from.size(), to);
+            pos += to.size();
+        }
+    }
+#endif
+    brls::Logger::debug("{} Url: {}, extra: {}", method, finalUrl, finalExtra);
+    if (finalExtra.empty()) {
+        command_async("loadfile", finalUrl, method);
     } else {
         if (mpvClientApiVersion() >= MPV_MAKE_VERSION(2, 3))
-            command_async("loadfile", url, method, "0", extra);
+            command_async("loadfile", finalUrl, method, "0", finalExtra);
         else
-            command_async("loadfile", url, method, extra);
+            command_async("loadfile", finalUrl, method, finalExtra);
     }
 }
 
