@@ -1,8 +1,13 @@
 package cn.xfangfang.wiliwili;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 import okhttp3.FormBody;
 import okhttp3.Headers;
@@ -81,14 +86,56 @@ public class HttpClient {
             }
             ResponseBody b = r.body();
             if (b != null) {
-                h.body = b.bytes();
-                h.text = new String(h.body);
+                byte[] body = b.bytes();
+                // OkHttp's BridgeInterceptor auto-decompresses "gzip" but NOT
+                // "deflate". Bilibili's danmaku endpoint (/x/v1/dm/list.so)
+                // always returns deflate-compressed XML regardless of the
+                // Accept-Encoding header we send, so without this the native
+                // side receives raw deflate bytes and tinyxml2::Parse fails.
+                String enc = hh.get("Content-Encoding");
+                if (enc != null && enc.equalsIgnoreCase("deflate") && body.length > 0) {
+                    byte[] inflated = inflateDeflate(body);
+                    if (inflated != null) body = inflated;
+                }
+                h.body = body;
+                // Use UTF-8 explicitly: Bilibili API responses are UTF-8, and
+                // new String(byte[]) would otherwise use the platform default
+                // charset (not necessarily UTF-8 on some locales).
+                h.text = new String(body, StandardCharsets.UTF_8);
             }
         } catch (Exception e) {
             h.error = e.getMessage();
             if (h.error == null) h.error = e.getClass().getSimpleName();
         }
         return h;
+    }
+
+    /**
+     * Inflate a deflate-compressed byte array.
+     * <p>
+     * Tries zlib-wrapped deflate (RFC 1950, the HTTP standard) first, then
+     * falls back to raw deflate (RFC 1951) — some servers send the latter
+     * despite the spec.
+     */
+    private static byte[] inflateDeflate(byte[] data) {
+        // zlib-wrapped (default Inflater uses nowrap=false).
+        byte[] out = tryInflate(data, new Inflater(false));
+        if (out != null) return out;
+        // Raw deflate (nowrap=true).
+        return tryInflate(data, new Inflater(true));
+    }
+
+    private static byte[] tryInflate(byte[] data, Inflater inf) {
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(data);
+             InflaterInputStream iis = new InflaterInputStream(bais, inf)) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = iis.read(buf)) > 0) bos.write(buf, 0, n);
+            return bos.toByteArray();
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     /** Synchronous GET. Returns an HttpResponse (never null). */
