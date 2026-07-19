@@ -11,13 +11,18 @@
 #include <sys/stat.h>
 
 // SDL_AndroidGetExternalStoragePath — declared here to avoid pulling in
-// SDL_system.h (whose include path is set up by the borealis SDL2 target).
+// SDL_system.h. May return NULL if SDL's Java side isn't initialized yet
+// (e.g. during JNI_OnLoad, which runs inside System.loadLibrary before
+// SDLActivity has set up its singleton).
 extern "C" const char* SDL_AndroidGetExternalStoragePath(void);
 
-// Return the startup log path under Android external app-specific storage
-// (no runtime permission needed since API 19, browsable with a file manager).
-// Falls back to /sdcard/... if SDL isn't ready yet. Creates the parent
-// directory so fopen() can succeed on first call.
+// Return the startup log path. Tries SDL's external storage path first
+// (browsable location users can find with a file manager); falls back to
+// a hard-coded path if SDL isn't ready yet. The fallback is the same
+// directory SDL would return, so logs end up in the same place either
+// way. MUST NOT call any SDL function that could crash if SDL's Java
+// side isn't initialized — SDL_AndroidGetExternalStoragePath is safe
+// (returns NULL in that case, no deref).
 static const char* startupLogPath() {
     static char buf[512] = {0};
     if (buf[0]) return buf;
@@ -25,10 +30,14 @@ static const char* startupLogPath() {
     if (base && base[0]) {
         std::snprintf(buf, sizeof(buf), "%s/wiliwili/wiliwili_startup.log", base);
     } else {
+        // Fallback used during JNI_OnLoad (before SDL Java init) or if
+        // SDL_AndroidGetExternalStoragePath returns NULL for any reason.
         std::snprintf(buf, sizeof(buf),
             "/sdcard/Android/data/cn.xfangfang.wiliwili/files/wiliwili/wiliwili_startup.log");
     }
-    // Create parent directory (best-effort; fopen will just fail if it can't).
+    // Create parent directory chain (best-effort; fopen will fail silently
+    // if it can't). The /sdcard/Android/data/<pkg>/files/ tree is created
+    // by the framework on install, so only the "wiliwili" leaf is missing.
     char dir[512];
     std::snprintf(dir, sizeof(dir), "%s", buf);
     char* slash = std::strrchr(dir, '/');
@@ -36,9 +45,10 @@ static const char* startupLogPath() {
     return buf;
 }
 
-// Append a line to the startup log file (best-effort, never throws).
-// Used by crash_helper, main.cpp and android_http.cpp to trace the boot
-// sequence when logcat is unavailable.
+// Append a line to the startup log file (best-effort, never throws, never
+// crashes). Safe to call from JNI_OnLoad, static initializers, signal
+// handlers, or any thread. Used by crash_helper, main.cpp and
+// android_http.cpp to trace the boot sequence when logcat is unavailable.
 extern "C" void wiliwili_logf(const char* msg) {
     __android_log_write(ANDROID_LOG_INFO, "wiliwili", msg);
     if (FILE* f = std::fopen(startupLogPath(), "a")) {
