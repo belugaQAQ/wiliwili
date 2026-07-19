@@ -32,7 +32,7 @@ static const char* startupLogPath() {
     char dir[512];
     std::snprintf(dir, sizeof(dir), "%s", buf);
     char* slash = std::strrchr(dir, '/');
-    if (slash) { *slash = '\0'; std::mkdir(dir, 0700); }
+    if (slash) { *slash = '\0'; ::mkdir(dir, 0700); }
     return buf;
 }
 
