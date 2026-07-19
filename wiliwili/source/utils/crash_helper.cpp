@@ -4,41 +4,114 @@
 #if defined(__ANDROID__)
 
 #include <android/log.h>
+#include <jni.h>
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <sys/stat.h>
+#include <unistd.h>
 
 // SDL_AndroidGetExternalStoragePath — declared here to avoid pulling in
 // SDL_system.h (whose include path is set up by the borealis SDL2 target).
+// NOTE: only safe to call AFTER SDL has initialized its Java side
+// (SDLActivity.onCreate). Calling it from JNI_OnLoad (which runs during
+// System.loadLibrary, before super.onCreate) crashes. So we avoid it
+// entirely in wiliwili_logf and use a self-contained path resolution.
 extern "C" const char* SDL_AndroidGetExternalStoragePath(void);
 
-// Return the startup log path under Android external app-specific storage
-// (no runtime permission needed since API 19, browsable with a file manager).
-// Falls back to /sdcard/... if SDL isn't ready yet. Creates the parent
-// directory so fopen() can succeed on first call.
-static const char* startupLogPath() {
-    static char buf[512] = {0};
-    if (buf[0]) return buf;
-    const char* base = SDL_AndroidGetExternalStoragePath();
-    if (base && base[0]) {
-        std::snprintf(buf, sizeof(buf), "%s/wiliwili/wiliwili_startup.log", base);
-    } else {
-        std::snprintf(buf, sizeof(buf),
-            "/sdcard/Android/data/cn.xfangfang.wiliwili/files/wiliwili/wiliwili_startup.log");
+// Cached JavaVM pointer, set by JNI_OnLoad. Used to resolve the app's
+// external files dir via JNI (Activity.getExternalFilesDir) without
+// depending on SDL being initialized.
+static JavaVM* g_javaVM = nullptr;
+
+// Set by JNI_OnLoad so we can detect whether the crash happened during
+// .so load (before main()).
+static bool g_jniOnLoadRunning = false;
+
+// Once resolved (lazily, on first wiliwili_logf call from a context where
+// JNI is usable), holds the absolute path to wiliwili_startup.log.
+static char g_logPath[512] = {0};
+
+// Resolve the log file path via JNI: Activity.getExternalFilesDir(null)
+// + "/wiliwili/wiliwili_startup.log". Returns nullptr if resolution fails
+// (e.g. no Activity available yet). Does NOT call SDL.
+static const char* resolveLogPathViaJni() {
+    if (!g_javaVM) return nullptr;
+    JNIEnv* env = nullptr;
+    bool attached = false;
+    if (g_javaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) == JNI_EDETACHED) {
+        if (g_javaVM->AttachCurrentThread(&env, nullptr) == JNI_OK) attached = true;
+        else return nullptr;
+    } else if (!env) {
+        return nullptr;
     }
-    // Create parent directory (best-effort; fopen will just fail if it can't).
-    char dir[512];
-    std::snprintf(dir, sizeof(dir), "%s", buf);
-    char* slash = std::strrchr(dir, '/');
-    if (slash) { *slash = '\0'; ::mkdir(dir, 0700); }
-    return buf;
+
+    const char* result = nullptr;
+    // ActivityThread.currentApplicationThread →getApplication → getExternalFilesDir
+    // This chain avoids needing a cached Activity reference.
+    jclass atClass = env->FindClass("android/app/ActivityThread");
+    if (!atClass) { env->ExceptionClear(); goto cleanup; }
+    jmethodID getThread = env->GetStaticMethodID(atClass, "currentApplicationThread", "()Landroid/app/ApplicationThread;");
+    if (!getThread) { env->ExceptionClear(); goto cleanup; }
+    jobject thread = env->CallStaticObjectMethod(atClass, getThread);
+    if (!thread || env->ExceptionCheck()) { env->ExceptionClear(); goto cleanup; }
+    jmethodID getApp = env->GetMethodID(env->GetObjectClass(thread), "getApplication", "()Landroid/app/Application;");
+    if (!getApp) { env->ExceptionClear(); goto cleanup; }
+    jobject app = env->CallObjectMethod(thread, getApp);
+    if (!app || env->ExceptionCheck()) { env->ExceptionClear(); goto cleanup; }
+    // Application extends ContextWrapper → getExternalFilesDir
+    jmethodID getDir = env->GetMethodID(env->GetObjectClass(app), "getExternalFilesDir", "(Ljava/io/File;)Ljava/io/File;");
+    if (!getDir) { env->ExceptionClear(); goto cleanup; }
+    jobject dir = env->CallObjectMethod(app, getDir, nullptr);
+    if (!dir || env->ExceptionCheck()) { env->ExceptionClear(); goto cleanup; }
+    jmethodID getAbsPath = env->GetMethodID(env->GetObjectClass(dir), "getAbsolutePath", "()Ljava/lang/String;");
+    if (!getAbsPath) { env->ExceptionClear(); goto cleanup; }
+    jstring jpath = static_cast<jstring>(env->CallObjectMethod(dir, getAbsPath));
+    if (!jpath || env->ExceptionCheck()) { env->ExceptionClear(); goto cleanup; }
+    const char* chars = env->GetStringUTFChars(jpath, nullptr);
+    if (chars) {
+        std::snprintf(g_logPath, sizeof(g_logPath), "%s/wiliwili/wiliwili_startup.log", chars);
+        env->ReleaseStringUTFChars(jpath, chars);
+        result = g_logPath;
+        // Create parent directory.
+        char dirbuf[512];
+        std::snprintf(dirbuf, sizeof(dirbuf), "%s", g_logPath);
+        char* slash = std::strrchr(dirbuf, '/');
+        if (slash) { *slash = '\0'; ::mkdir(dirbuf, 0700); }
+    }
+    env->DeleteLocalRef(jpath);
+cleanup:
+    if (attached) g_javaVM->DetachCurrentThread();
+    return result;
+}
+
+// Return the startup log path. Tries (in order):
+//   1. Cached path from a previous successful call.
+//   2. JNI resolution via ActivityThread (no SDL dependency).
+//   3. SDL_AndroidGetExternalStoragePath (only if SDL is ready; checked
+//      by whether g_jniOnLoadRunning is false AND we're past JNI_OnLoad).
+//   4. Hardcoded fallback under /sdcard.
+// NEVER calls SDL during JNI_OnLoad (SDL's Java side isn't ready then).
+static const char* startupLogPath() {
+    if (g_logPath[0]) return g_logPath;
+    // Try JNI path first (works during JNI_OnLoad since it only needs the
+    // Application, which exists by the time System.loadLibrary is called).
+    const char* p = resolveLogPathViaJni();
+    if (p) return p;
+    // SDL not ready or JNI failed — use hardcoded fallback.
+    std::snprintf(g_logPath, sizeof(g_logPath),
+        "/sdcard/Android/data/cn.xfangfang.wiliwili/files/wiliwili/wiliwili_startup.log");
+    // Try to create the parent dir.
+    char dirbuf[512];
+    std::snprintf(dirbuf, sizeof(dirbuf), "%s", g_logPath);
+    char* slash = std::strrchr(dirbuf, '/');
+    if (slash) { *slash = '\0'; ::mkdir(dirbuf, 0700); }
+    return g_logPath;
 }
 
 // Append a line to the startup log file (best-effort, never throws).
-// Used by crash_helper, main.cpp and android_http.cpp to trace the boot
-// sequence when logcat is unavailable.
+// Also writes to logcat. Safe to call from JNI_OnLoad and from any thread.
 extern "C" void wiliwili_logf(const char* msg) {
     __android_log_write(ANDROID_LOG_INFO, "wiliwili", msg);
     if (FILE* f = std::fopen(startupLogPath(), "a")) {
@@ -60,8 +133,8 @@ static void androidCrashHandler(int sig) {
     }
     char buf[256];
     std::snprintf(buf, sizeof(buf),
-        ">>> CRASH: signal %d (%s) <<<  [crash_helper.cpp androidCrashHandler]",
-        sig, sigName);
+        ">>> CRASH: signal %d (%s) <<<  [crash_helper.cpp androidCrashHandler] jniOnLoad=%d",
+        sig, sigName, (int)g_jniOnLoadRunning);
     __android_log_write(ANDROID_LOG_FATAL, "wiliwili", buf);
     // Write to file so we can inspect it even without logcat.
     if (FILE* f = std::fopen(startupLogPath(), "a")) {
@@ -72,13 +145,31 @@ static void androidCrashHandler(int sig) {
     std::_Exit(1);
 }
 
-void wiliwili::initCrashDump() {
+// Called by android_http.cpp's JNI_OnLoad to register the JavaVM so
+// wiliwili_logf can resolve the log path via JNI without SDL.
+extern "C" void wiliwili_set_javavm(JavaVM* vm) {
+    g_javaVM = vm;
+}
+
+// Called by android_http.cpp's JNI_OnLoad to mark entry/exit.
+extern "C" void wiliwili_set_jni_onload_running(bool running) {
+    g_jniOnLoadRunning = running;
+}
+
+// Register the crash handler. Called from JNI_OnLoad (android_http.cpp)
+// so crashes during .so load are caught, and again from ProgramConfig::init
+// (wiliwili::initCrashDump) for redundancy. signal() is idempotent.
+extern "C" void wiliwili_register_crash_handler() {
     signal(SIGSEGV, androidCrashHandler);
     signal(SIGABRT, androidCrashHandler);
     signal(SIGFPE,  androidCrashHandler);
     signal(SIGILL,  androidCrashHandler);
     signal(SIGBUS,  androidCrashHandler);
     signal(SIGTRAP, androidCrashHandler);
+}
+
+void wiliwili::initCrashDump() {
+    wiliwili_register_crash_handler();
 }
 
 #elif defined(_WIN32) && !defined(__WINRT__)

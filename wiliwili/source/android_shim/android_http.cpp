@@ -10,6 +10,7 @@
 
 #include <jni.h>
 
+#include <csignal>
 #include <cstdio>
 #include <cstring>
 
@@ -25,6 +26,16 @@ extern "C" void* SDL_AndroidGetJNIEnv(void);
 // whether ensureCache() succeeds and which JNI step fails, even when
 // logcat is unavailable.
 extern "C" void wiliwili_logf(const char* msg);
+// Crash helper hooks: register JavaVM + mark JNI_OnLoad entry/exit so
+// the crash handler can resolve the log path without SDL and report
+// whether the crash happened during .so load.
+extern "C" void wiliwili_set_javavm(JavaVM* vm);
+extern "C" void wiliwili_set_jni_onload_running(bool running);
+
+// Forward-declared crash handler from crash_helper.cpp. We register it
+// here (in JNI_OnLoad) instead of waiting for main(), because a crash
+// during JNI_OnLoad itself would otherwise be unreported.
+extern "C" void wiliwili_register_crash_handler();
 
 namespace bilibili {
 namespace {
@@ -152,18 +163,33 @@ static void initJniCache(JNIEnv* env) {
 // all class/method/field references here so later calls from native threads
 // (via SDL_AndroidGetJNIEnv) can use them without FindClass.
 extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/) {
+    // Register the crash handler FIRST — before anything else — so if any
+    // step below crashes, we get a file-backed trace instead of a silent
+    // death. main()'s initCrashDump() runs too late for JNI_OnLoad crashes.
+    wiliwili_register_crash_handler();
+    // Register the JavaVM so wiliwili_logf can resolve the log path
+    // via JNI (ActivityThread → Application → getExternalFilesDir) without
+    // depending on SDL (which isn't initialized yet — SDLActivity.onCreate
+    // hasn't run, since we're being called from System.loadLibrary).
+    wiliwili_set_javavm(vm);
+    // Mark that we're inside JNI_OnLoad so the crash handler reports it.
+    wiliwili_set_jni_onload_running(true);
+
     JNIEnv* env = nullptr;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         wiliwili_logf("[http] JNI_OnLoad: GetEnv failed");
+        wiliwili_set_jni_onload_running(false);
         return JNI_ERR;
     }
     wiliwili_logf("[http] JNI_OnLoad: entered");
     initJniCache(env);
     if (!cache().ok) {
         wiliwili_logf("[http] JNI_OnLoad: cache init failed, returning JNI_ERR");
+        wiliwili_set_jni_onload_running(false);
         return JNI_ERR;
     }
     wiliwili_logf("[http] JNI_OnLoad: returning JNI_VERSION_1_6");
+    wiliwili_set_jni_onload_running(false);
     return JNI_VERSION_1_6;
 }
 
