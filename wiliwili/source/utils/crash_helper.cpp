@@ -35,7 +35,8 @@ static char g_logPath[512] = {0};
 
 // Resolve the log file path via JNI: Activity.getExternalFilesDir(null)
 // + "/wiliwili/wiliwili_startup.log". Returns nullptr if resolution fails
-// (e.g. no Activity available yet). Does NOT call SDL.
+// (e.g. no Activity available yet). Does NOT call SDL. Uses nested ifs
+// instead of goto (C++ forbids jumping over variables with constructors).
 static const char* resolveLogPathViaJni() {
     if (!g_javaVM) return nullptr;
     JNIEnv* env = nullptr;
@@ -48,40 +49,51 @@ static const char* resolveLogPathViaJni() {
     }
 
     const char* result = nullptr;
-    // ActivityThread.currentApplicationThread →getApplication → getExternalFilesDir
-    // This chain avoids needing a cached Activity reference.
+    // ActivityThread.currentApplicationThread → getApplication → getExternalFilesDir
     jclass atClass = env->FindClass("android/app/ActivityThread");
-    if (!atClass) { env->ExceptionClear(); goto cleanup; }
-    jmethodID getThread = env->GetStaticMethodID(atClass, "currentApplicationThread", "()Landroid/app/ApplicationThread;");
-    if (!getThread) { env->ExceptionClear(); goto cleanup; }
-    jobject thread = env->CallStaticObjectMethod(atClass, getThread);
-    if (!thread || env->ExceptionCheck()) { env->ExceptionClear(); goto cleanup; }
-    jmethodID getApp = env->GetMethodID(env->GetObjectClass(thread), "getApplication", "()Landroid/app/Application;");
-    if (!getApp) { env->ExceptionClear(); goto cleanup; }
-    jobject app = env->CallObjectMethod(thread, getApp);
-    if (!app || env->ExceptionCheck()) { env->ExceptionClear(); goto cleanup; }
-    // Application extends ContextWrapper → getExternalFilesDir
-    jmethodID getDir = env->GetMethodID(env->GetObjectClass(app), "getExternalFilesDir", "(Ljava/io/File;)Ljava/io/File;");
-    if (!getDir) { env->ExceptionClear(); goto cleanup; }
-    jobject dir = env->CallObjectMethod(app, getDir, nullptr);
-    if (!dir || env->ExceptionCheck()) { env->ExceptionClear(); goto cleanup; }
-    jmethodID getAbsPath = env->GetMethodID(env->GetObjectClass(dir), "getAbsolutePath", "()Ljava/lang/String;");
-    if (!getAbsPath) { env->ExceptionClear(); goto cleanup; }
-    jstring jpath = static_cast<jstring>(env->CallObjectMethod(dir, getAbsPath));
-    if (!jpath || env->ExceptionCheck()) { env->ExceptionClear(); goto cleanup; }
-    const char* chars = env->GetStringUTFChars(jpath, nullptr);
-    if (chars) {
-        std::snprintf(g_logPath, sizeof(g_logPath), "%s/wiliwili/wiliwili_startup.log", chars);
-        env->ReleaseStringUTFChars(jpath, chars);
-        result = g_logPath;
-        // Create parent directory.
-        char dirbuf[512];
-        std::snprintf(dirbuf, sizeof(dirbuf), "%s", g_logPath);
-        char* slash = std::strrchr(dirbuf, '/');
-        if (slash) { *slash = '\0'; ::mkdir(dirbuf, 0700); }
+    if (atClass) {
+        jmethodID getThread = env->GetStaticMethodID(atClass, "currentApplicationThread", "()Landroid/app/ApplicationThread;");
+        if (getThread) {
+            jobject thread = env->CallStaticObjectMethod(atClass, getThread);
+            if (thread && !env->ExceptionCheck()) {
+                jmethodID getApp = env->GetMethodID(env->GetObjectClass(thread), "getApplication", "()Landroid/app/Application;");
+                if (getApp) {
+                    jobject app = env->CallObjectMethod(thread, getApp);
+                    if (app && !env->ExceptionCheck()) {
+                        jmethodID getDir = env->GetMethodID(env->GetObjectClass(app), "getExternalFilesDir", "(Ljava/io/File;)Ljava/io/File;");
+                        if (getDir) {
+                            jobject dir = env->CallObjectMethod(app, getDir, nullptr);
+                            if (dir && !env->ExceptionCheck()) {
+                                jmethodID getAbsPath = env->GetMethodID(env->GetObjectClass(dir), "getAbsolutePath", "()Ljava/lang/String;");
+                                if (getAbsPath) {
+                                    jstring jpath = static_cast<jstring>(env->CallObjectMethod(dir, getAbsPath));
+                                    if (jpath && !env->ExceptionCheck()) {
+                                        const char* chars = env->GetStringUTFChars(jpath, nullptr);
+                                        if (chars) {
+                                            std::snprintf(g_logPath, sizeof(g_logPath), "%s/wiliwili/wiliwili_startup.log", chars);
+                                            env->ReleaseStringUTFChars(jpath, chars);
+                                            result = g_logPath;
+                                            char dirbuf[512];
+                                            std::snprintf(dirbuf, sizeof(dirbuf), "%s", g_logPath);
+                                            char* slash = std::strrchr(dirbuf, '/');
+                                            if (slash) { *slash = '\0'; ::mkdir(dirbuf, 0700); }
+                                        }
+                                        env->DeleteLocalRef(jpath);
+                                    }
+                                }
+                                env->DeleteLocalRef(dir);
+                            }
+                        }
+                        env->DeleteLocalRef(app);
+                    }
+                }
+                env->DeleteLocalRef(thread);
+            }
+        }
+        env->DeleteLocalRef(atClass);
     }
-    env->DeleteLocalRef(jpath);
-cleanup:
+    if (env->ExceptionCheck()) env->ExceptionClear();
+
     if (attached) g_javaVM->DetachCurrentThread();
     return result;
 }
