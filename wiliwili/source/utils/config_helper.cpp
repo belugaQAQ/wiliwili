@@ -200,9 +200,12 @@ std::unordered_map<SettingItem, ProgramOption> ProgramConfig::SETTING_MAP = {
     {SettingItem::PLAYER_HIGHLIGHT_BAR, {"player_highlight_bar", {}, {}, 0}},
     {SettingItem::PLAYER_SKIP_OPENING_CREDITS, {"player_skip_opening_credits", {}, {}, 1}},
     {SettingItem::PLAYER_LOW_QUALITY, {"player_low_quality", {}, {}, 1}},
-#if defined(IOS) || defined(__PSV__) || defined(__SWITCH__) || defined(__ANDROID__)
+#if defined(IOS) || defined(__PSV__) || defined(__SWITCH__)
     {SettingItem::PLAYER_HWDEC, {"player_hwdec", {}, {}, 1}},
 #else
+    // Android defaults to software decode: mediacodec-copy causes flicker /
+    // stutter on most Android TV boxes (MediaCodec async timing jitter +
+    // GPU→CPU→GPU round-trip per frame). Users can still opt in via Settings.
     {SettingItem::PLAYER_HWDEC, {"player_hwdec", {}, {}, 0}},
 #endif
     {SettingItem::PLAYER_HWDEC_CUSTOM, {"player_hwdec_custom", {}, {}, 0}},

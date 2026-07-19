@@ -187,6 +187,13 @@ elseif (PLATFORM_ANDROID)
     endif ()
 
     list(APPEND APP_PLATFORM_OPTION -D__ANDROID__)
+    # Mark the GL backend as GLES3 so mpv_core.hpp does NOT enable MPV_USE_VAO.
+    # The VAO code path is known to be flaky on GLES3 drivers that nominally
+    # support it (the in-tree comment calls out ANGLE, but several Android TV
+    # GPUs exhibit the same flicker/jitter because their VAO impl returns stale
+    # attribute state). The non-VAO path uses plain VBO+vertexAttribPointer,
+    # which is universally reliable on GLES3.
+    list(APPEND APP_PLATFORM_OPTION -DUSE_GLES3)
     # Android platform libs: log/android (JNI + logcat), EGL/GLESv2 (GL context
     # + GLES2 symbols used by nanovg and mpv render context).
     list(APPEND APP_PLATFORM_LIB log android EGL GLESv2)

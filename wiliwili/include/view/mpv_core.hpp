@@ -376,7 +376,17 @@ public:
 #elif defined(PS4)
     inline static std::string PLAYER_HWDEC_METHOD = "no";
 #elif defined(__ANDROID__)
-    inline static std::string PLAYER_HWDEC_METHOD = "mediacodec-copy";
+    // Default to software decoding on Android. mediacodec-copy works on some
+    // devices but causes flicker/stutter on many Android TVs because:
+    //   1. MediaCodec async output → frame timing jitter
+    //   2. Each frame does GPU→CPU (YUV) → CPU YUV→RGB → GPU upload (~12MB
+    //      per 1080p frame), overwhelming TV-class CPUs at 60fps
+    //   3. Some TV MediaCodec decoders output frames out of order
+    // Software decoding is universally stable. Users who want to try hardware
+    // decode can enable it in Settings (PLAYER_HWDEC) and override the method
+    // (PLAYER_HWDEC_CUSTOM) — mediacodec-copy or mediacodec typically work on
+    // flagship phones/emulators but not on most TV boxes.
+    inline static std::string PLAYER_HWDEC_METHOD = "no";
 #else
     inline static std::string PLAYER_HWDEC_METHOD = "auto-safe";
 #endif
