@@ -46,7 +46,12 @@ struct JniCache {
     jfieldID errorField{nullptr};
     jfieldID setCookiesField{nullptr};
 
-    bool initialized{false};
+    // java.lang.String class — FindClass("java/lang/String") from a native
+    // thread (via SDL_AndroidGetJNIEnv) uses the system class loader, which
+    // CAN find system classes. But we cache it anyway for consistency and
+    // to avoid repeated FindClass calls.
+    jclass stringClass{nullptr};
+
     bool ok{false};
 };
 
@@ -55,30 +60,44 @@ JniCache& cache() {
     return c;
 }
 
-bool ensureCache() {
+// Initialize the JNI cache. Called from JNI_OnLoad, which the VM invokes
+// when libwiliwili.so is loaded (System.loadLibrary("wiliwili")). At that
+// point the calling thread is the one that loaded the .so and its class
+// loader is the APP class loader, so FindClass can locate app classes like
+// cn/xfangfang/wiliwili/HttpClient. If we called FindClass later from a
+// native thread (the ones SDL spawns for main() / cpr workers), the VM
+// would use the system class loader and FindClass would return NULL for
+// any app-defined class — which is exactly what happened before this fix.
+static void initJniCache(JNIEnv* env) {
     JniCache& c = cache();
-    if (c.initialized) return c.ok;
-    c.initialized = true;
+    if (c.ok) return;
 
-    wiliwili_logf("[http] ensureCache: starting JNI init");
+    wiliwili_logf("[http] JNI_OnLoad: initializing JNI cache");
 
-    JNIEnv* env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
-    if (!env) {
-        wiliwili_logf("[http] ensureCache FAILED: SDL_AndroidGetJNIEnv returned null");
-        return false;
+    // java.lang.String — needed by toJStringArray.
+    {
+        jclass local = env->FindClass("java/lang/String");
+        if (!local) {
+            wiliwili_logf("[http] JNI_OnLoad FAILED: FindClass(java/lang/String) returned null");
+            if (env->ExceptionCheck()) env->ExceptionClear();
+            return;
+        }
+        c.stringClass = static_cast<jclass>(env->NewGlobalRef(local));
+        env->DeleteLocalRef(local);
     }
-    wiliwili_logf("[http] ensureCache: got JNIEnv");
 
     // HttpClient class + static methods.
-    jclass local = env->FindClass("cn/xfangfang/wiliwili/HttpClient");
-    if (!local) {
-        wiliwili_logf("[http] ensureCache FAILED: FindClass(HttpClient) returned null");
-        if (env->ExceptionCheck()) env->ExceptionClear();
-        return false;
+    {
+        jclass local = env->FindClass("cn/xfangfang/wiliwili/HttpClient");
+        if (!local) {
+            wiliwili_logf("[http] JNI_OnLoad FAILED: FindClass(HttpClient) returned null");
+            if (env->ExceptionCheck()) env->ExceptionClear();
+            return;
+        }
+        c.httpClientClass = static_cast<jclass>(env->NewGlobalRef(local));
+        env->DeleteLocalRef(local);
+        wiliwili_logf("[http] JNI_OnLoad: found HttpClient class");
     }
-    c.httpClientClass = static_cast<jclass>(env->NewGlobalRef(local));
-    env->DeleteLocalRef(local);
-    wiliwili_logf("[http] ensureCache: found HttpClient class");
 
     c.getMethod = env->GetStaticMethodID(
         c.httpClientClass, "get",
@@ -94,21 +113,23 @@ bool ensureCache() {
         "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)"
         "Lcn/xfangfang/wiliwili/HttpResponse;");
     if (!c.getMethod || !c.postMethod || !c.postRawMethod) {
-        wiliwili_logf("[http] ensureCache FAILED: GetStaticMethodID returned null for one of get/post/postRaw");
+        wiliwili_logf("[http] JNI_OnLoad FAILED: GetStaticMethodID returned null for one of get/post/postRaw");
         if (env->ExceptionCheck()) env->ExceptionClear();
-        return false;
+        return;
     }
-    wiliwili_logf("[http] ensureCache: found get/post/postRaw methods");
+    wiliwili_logf("[http] JNI_OnLoad: found get/post/postRaw methods");
 
     // HttpResponse class + instance fields.
-    local = env->FindClass("cn/xfangfang/wiliwili/HttpResponse");
-    if (!local) {
-        wiliwili_logf("[http] ensureCache FAILED: FindClass(HttpResponse) returned null");
-        if (env->ExceptionCheck()) env->ExceptionClear();
-        return false;
+    {
+        jclass local = env->FindClass("cn/xfangfang/wiliwili/HttpResponse");
+        if (!local) {
+            wiliwili_logf("[http] JNI_OnLoad FAILED: FindClass(HttpResponse) returned null");
+            if (env->ExceptionCheck()) env->ExceptionClear();
+            return;
+        }
+        c.httpResponseClass = static_cast<jclass>(env->NewGlobalRef(local));
+        env->DeleteLocalRef(local);
     }
-    c.httpResponseClass = static_cast<jclass>(env->NewGlobalRef(local));
-    env->DeleteLocalRef(local);
 
     c.codeField = env->GetFieldID(c.httpResponseClass, "code", "I");
     c.reasonField = env->GetFieldID(c.httpResponseClass, "reason", "Ljava/lang/String;");
@@ -117,14 +138,42 @@ bool ensureCache() {
     c.errorField = env->GetFieldID(c.httpResponseClass, "error", "Ljava/lang/String;");
     c.setCookiesField = env->GetFieldID(c.httpResponseClass, "setCookies", "[Ljava/lang/String;");
     if (!c.codeField || !c.bodyField || !c.textField || !c.errorField) {
-        wiliwili_logf("[http] ensureCache FAILED: GetFieldID returned null for a HttpResponse field");
+        wiliwili_logf("[http] JNI_OnLoad FAILED: GetFieldID returned null for a HttpResponse field");
         if (env->ExceptionCheck()) env->ExceptionClear();
-        return false;
+        return;
     }
 
     c.ok = true;
-    wiliwili_logf("[http] ensureCache OK: JNI cache fully initialized");
-    return true;
+    wiliwili_logf("[http] JNI_OnLoad OK: JNI cache fully initialized");
+}
+
+// Called by JNI when libwiliwili.so is loaded. The JNIEnv here uses the
+// APP class loader, so FindClass can resolve app-defined classes. We cache
+// all class/method/field references here so later calls from native threads
+// (via SDL_AndroidGetJNIEnv) can use them without FindClass.
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/) {
+    JNIEnv* env = nullptr;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        wiliwili_logf("[http] JNI_OnLoad: GetEnv failed");
+        return JNI_ERR;
+    }
+    wiliwili_logf("[http] JNI_OnLoad: entered");
+    initJniCache(env);
+    if (!cache().ok) {
+        wiliwili_logf("[http] JNI_OnLoad: cache init failed, returning JNI_ERR");
+        return JNI_ERR;
+    }
+    wiliwili_logf("[http] JNI_OnLoad: returning JNI_VERSION_1_6");
+    return JNI_VERSION_1_6;
+}
+
+// Returns true if JNI_OnLoad has successfully initialized the cache. If
+// JNI_OnLoad failed (or hasn't run, which shouldn't happen since it runs
+// at .so load time), all HTTP calls will fail with "JNI cache not ready".
+bool ensureCache() {
+    if (cache().ok) return true;
+    wiliwili_logf("[http] ensureCache: JNI cache not ready (JNI_OnLoad did not succeed)");
+    return false;
 }
 
 std::string jstrToStd(JNIEnv* env, jstring jstr) {
@@ -135,16 +184,17 @@ std::string jstrToStd(JNIEnv* env, jstring jstr) {
     return out;
 }
 
-// Build a String[] from a vector<string>.
+// Build a String[] from a vector<string>. Uses the cached String class
+// (FindClass from a native thread is unreliable for app classes; system
+// classes work but caching avoids repeated lookups).
 jobjectArray toJStringArray(JNIEnv* env, const std::vector<std::string>& v) {
-    jclass strClass = env->FindClass("java/lang/String");
-    jobjectArray arr = env->NewObjectArray(static_cast<jsize>(v.size()), strClass, nullptr);
+    jobjectArray arr = env->NewObjectArray(static_cast<jsize>(v.size()),
+                                           cache().stringClass, nullptr);
     for (jsize i = 0; i < static_cast<jsize>(v.size()); ++i) {
         jstring js = env->NewStringUTF(v[i].c_str());
         env->SetObjectArrayElement(arr, i, js);
         env->DeleteLocalRef(js);
     }
-    env->DeleteLocalRef(strClass);
     return arr;
 }
 
