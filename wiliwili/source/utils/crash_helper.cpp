@@ -10,30 +10,40 @@
 #include <cstring>
 #include <sys/stat.h>
 
-// SDL_AndroidGetExternalStoragePath — declared here to avoid pulling in
-// SDL_system.h (whose include path is set up by the borealis SDL2 target).
-extern "C" const char* SDL_AndroidGetExternalStoragePath(void);
-
-// Return the startup log path under Android external app-specific storage
-// (no runtime permission needed since API 19, browsable with a file manager).
-// Falls back to /sdcard/... if SDL isn't ready yet. Creates the parent
-// directory so fopen() can succeed on first call.
-static const char* startupLogPath() {
-    static char buf[512] = {0};
-    if (buf[0]) return buf;
-    const char* base = SDL_AndroidGetExternalStoragePath();
-    if (base && base[0]) {
-        std::snprintf(buf, sizeof(buf), "%s/wiliwili/wiliwili_startup.log", base);
-    } else {
-        std::snprintf(buf, sizeof(buf),
-            "/sdcard/Android/data/cn.xfangfang.wiliwili/files/wiliwili/wiliwili_startup.log");
+// Recursively create directories (like mkdir -p). Best-effort; ignores
+// errors from already-existing directories.
+static void mkdirp(const char* path) {
+    char tmp[512];
+    std::snprintf(tmp, sizeof(tmp), "%s", path);
+    for (char* p = tmp + 1; *p; ++p) {
+        if (*p == '/') {
+            *p = '\0';
+            ::mkdir(tmp, 0700);
+            *p = '/';
+        }
     }
-    // Create parent directory (best-effort; fopen will just fail if it can't).
-    char dir[512];
-    std::snprintf(dir, sizeof(dir), "%s", buf);
-    char* slash = std::strrchr(dir, '/');
-    if (slash) { *slash = '\0'; ::mkdir(dir, 0700); }
-    return buf;
+    ::mkdir(tmp, 0700);
+}
+
+// Return the startup log path. DELIBERATELY does NOT call SDL functions —
+// wiliwili_logf() may be called from JNI_OnLoad, which runs during
+// System.loadLibrary("wiliwili"), BEFORE SDLActivity.onCreate has
+// initialized SDL. Calling SDL_AndroidGetExternalStoragePath() at that
+// point crashes (SDL's Java side is not ready). The path is hardcoded
+// based on the package name; it is the same external app-specific storage
+// path that SDL_AndroidGetExternalStoragePath would return.
+static const char* startupLogPath() {
+    static const char* path =
+        "/sdcard/Android/data/cn.xfangfang.wiliwili/files/wiliwili/wiliwili_startup.log";
+    static bool dirCreated = false;
+    if (!dirCreated) {
+        char dir[512];
+        std::snprintf(dir, sizeof(dir), "%s", path);
+        char* slash = std::strrchr(dir, '/');
+        if (slash) { *slash = '\0'; mkdirp(dir); }
+        dirCreated = true;
+    }
+    return path;
 }
 
 // Append a line to the startup log file (best-effort, never throws).
