@@ -9,6 +9,7 @@
 
 #include <android/log.h>
 #include <dirent.h>
+#include <errno.h>
 #include <jni.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -223,17 +224,29 @@ static jobject getAppContext(JNIEnv* env) {
     return app;
 }
 
-// Try to find a removable USB storage path via StorageManager.
-// Returns the absolute path (e.g. "/storage/AB12-CD34") or empty string.
-// Prefers a volume whose isRemovable()==true AND that we can actually write
-// a probe file to (because Android 11+ scoped storage may deny access even
-// when StorageManager reports the volume).
+// Try to find a writable directory on a removable USB storage.
+// Uses Context.getExternalFilesDirs(null) which:
+//   - needs NO storage permissions
+//   - returns app-specific dirs that the app can ALWAYS write to
+//   - includes dirs on removable storage (USB) when present, e.g.
+//     /Storage/0030-CECF/Harmony/cn.xfangfang.wiliwili/files on Huawei-like
+//     systems, or /storage/0030-CECF/Android/data/cn.xfangfang.wiliwili/files
+//     on stock Android.
+// Returns the absolute path of the USB app-specific dir, or empty string.
 static std::string findUsbStoragePath() {
-    if (!g_javaVM) return "";
+    if (!g_javaVM) {
+        __android_log_print(ANDROID_LOG_ERROR, "wiliwili",
+            "[runtime_log] findUsbStoragePath: no JavaVM");
+        return "";
+    }
     JNIEnv* env = nullptr;
     bool attached = false;
     if (g_javaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) == JNI_EDETACHED) {
-        if (g_javaVM->AttachCurrentThread(&env, nullptr) != JNI_OK) return "";
+        if (g_javaVM->AttachCurrentThread(&env, nullptr) != JNI_OK) {
+            __android_log_print(ANDROID_LOG_ERROR, "wiliwili",
+                "[runtime_log] AttachCurrentThread failed");
+            return "";
+        }
         attached = true;
     } else if (!env) {
         return "";
@@ -242,112 +255,81 @@ static std::string findUsbStoragePath() {
     std::string result;
     jobject app = getAppContext(env);
 
-    // Use a do-while(false) so we can `break` out without goto (C++ forbids
-    // goto jumping over variable initialisations).
     do {
-        if (!app) break;
-
-        // StorageManager sm = (StorageManager) app.getSystemService(Context.STORAGE_SERVICE)
-        jclass ctxClass = env->GetObjectClass(app);
-        jmethodID getSystemService = env->GetMethodID(ctxClass, "getSystemService", "(Ljava/lang/Class;)Ljava/lang/Object;");
-        env->DeleteLocalRef(ctxClass);
-        if (!getSystemService) break;
-
-        jclass smClass = env->FindClass("android/storage/StorageManager");
-        if (!smClass) break;
-        jmethodID getVolumes = env->GetMethodID(smClass, "getStorageVolumes", "()Ljava/util/List;");
-        if (!getVolumes) { env->DeleteLocalRef(smClass); break; }
-
-        jobject sm = env->CallObjectMethod(app, getSystemService, smClass);
-        env->DeleteLocalRef(smClass);
-        if (!sm || env->ExceptionCheck()) { env->ExceptionClear(); break; }
-
-        jobject volumes = env->CallObjectMethod(sm, getVolumes);
-        env->DeleteLocalRef(sm);
-        if (!volumes || env->ExceptionCheck()) { env->ExceptionClear(); break; }
-
-        // Iterate list
-        jclass listClass = env->GetObjectClass(volumes);
-        jmethodID sizeM = env->GetMethodID(listClass, "size", "()I");
-        jmethodID getM  = env->GetMethodID(listClass, "get", "(I)Ljava/lang/Object;");
-        env->DeleteLocalRef(listClass);
-
-        jclass volClass = env->FindClass("android/storage/StorageVolume");
-        jmethodID isRemovable = nullptr;
-        jmethodID getDirectory = nullptr;
-        jmethodID getState = nullptr;
-        if (volClass) {
-            isRemovable = env->GetMethodID(volClass, "isRemovable", "()Z");
-            // getDirectory() added in API 30. For older API, fall back to
-            // toString() or getPath().
-            getDirectory = env->GetMethodID(volClass, "getDirectory", "()Ljava/io/File;");
-            if (!getDirectory || env->ExceptionCheck()) {
-                env->ExceptionClear();
-                getDirectory = nullptr;
-            }
-            getState = env->GetMethodID(volClass, "getState", "()Ljava/lang/String;");
+        if (!app) {
+            __android_log_print(ANDROID_LOG_ERROR, "wiliwili",
+                "[runtime_log] getAppContext returned null");
+            break;
         }
 
-        jint n = sizeM ? env->CallIntMethod(volumes, sizeM) : 0;
-        for (jint i = 0; i < n && result.empty(); i++) {
-            jobject vol = env->CallObjectMethod(volumes, getM, i);
-            if (!vol || env->ExceptionCheck()) { env->ExceptionClear(); continue; }
+        // File[] dirs = app.getExternalFilesDirs(null)
+        jclass ctxClass = env->GetObjectClass(app);
+        jmethodID getDirs = env->GetMethodID(ctxClass, "getExternalFilesDirs",
+            "(Ljava/lang/String;)[Ljava/io/File;");
+        env->DeleteLocalRef(ctxClass);
+        if (!getDirs || env->ExceptionCheck()) {
+            env->ExceptionClear();
+            __android_log_print(ANDROID_LOG_ERROR, "wiliwili",
+                "[runtime_log] getExternalFilesDirs method not found");
+            break;
+        }
 
-            bool removable = false;
-            if (isRemovable) {
-                removable = env->CallBooleanMethod(vol, isRemovable);
-                if (env->ExceptionCheck()) env->ExceptionClear();
-            }
-            if (!removable) { env->DeleteLocalRef(vol); continue; }
+        jobjectArray dirs = (jobjectArray)env->CallObjectMethod(app, getDirs, nullptr);
+        if (!dirs || env->ExceptionCheck()) {
+            env->ExceptionClear();
+            __android_log_print(ANDROID_LOG_ERROR, "wiliwili",
+                "[runtime_log] getExternalFilesDirs call failed");
+            break;
+        }
 
-            // Check state == "mounted"
-            std::string stateStr;
-            if (getState) {
-                jstring jstate = (jstring)env->CallObjectMethod(vol, getState);
-                if (jstate && !env->ExceptionCheck()) {
-                    const char* c = env->GetStringUTFChars(jstate, nullptr);
-                    if (c) { stateStr = c; env->ReleaseStringUTFChars(jstate, c); }
-                    env->DeleteLocalRef(jstate);
-                } else env->ExceptionClear();
-            }
-            if (!stateStr.empty() && stateStr != "mounted") {
-                env->DeleteLocalRef(vol);
-                continue;
-            }
+        jsize n = env->GetArrayLength(dirs);
+        __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+            "[runtime_log] getExternalFilesDirs returned %d dirs", (int)n);
 
-            // Get directory path
+        // Index 0 = primary external storage (always present, not USB).
+        // Index 1+ = secondary volumes (USB, SD card). Pick the first one
+        // we can actually write to.
+        for (jsize i = 0; i < n; i++) {
+            jobject f = env->GetObjectArrayElement(dirs, i);
+            if (!f) continue;
+
             std::string path;
-            if (getDirectory) {
-                jobject f = env->CallObjectMethod(vol, getDirectory);
-                if (f && !env->ExceptionCheck()) {
-                    jmethodID getAbs = env->GetMethodID(env->GetObjectClass(f), "getAbsolutePath", "()Ljava/lang/String;");
-                    if (getAbs) {
-                        jstring jpath = (jstring)env->CallObjectMethod(f, getAbs);
-                        if (jpath && !env->ExceptionCheck()) {
-                            const char* c = env->GetStringUTFChars(jpath, nullptr);
-                            if (c) { path = c; env->ReleaseStringUTFChars(jpath, c); }
-                            env->DeleteLocalRef(jpath);
-                        }
-                    }
-                    env->DeleteLocalRef(f);
+            jmethodID getAbs = env->GetMethodID(env->GetObjectClass(f),
+                "getAbsolutePath", "()Ljava/lang/String;");
+            if (getAbs) {
+                jstring jpath = (jstring)env->CallObjectMethod(f, getAbs);
+                if (jpath && !env->ExceptionCheck()) {
+                    const char* c = env->GetStringUTFChars(jpath, nullptr);
+                    if (c) { path = c; env->ReleaseStringUTFChars(jpath, c); }
+                    env->DeleteLocalRef(jpath);
                 } else env->ExceptionClear();
             }
-            if (path.empty()) { env->DeleteLocalRef(vol); continue; }
+            env->DeleteLocalRef(f);
 
-            // Probe write: try to mkdir <path>/wiliwili and write a tiny file.
-            std::string dir = path + "/wiliwili";
-            ::mkdir(dir.c_str(), 0777);
-            std::string probe = dir + "/.probe";
+            __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+                "[runtime_log] dir[%d]: %s", (int)i, path.empty() ? "(null)" : path.c_str());
+
+            if (path.empty()) continue;
+            // Skip primary storage (index 0) — we only want USB.
+            if (i == 0) continue;
+
+            // Ensure dir exists and is writable.
+            ::mkdir(path.c_str(), 0777);
+            std::string probe = path + "/.probe";
             if (FILE* fp = std::fopen(probe.c_str(), "w")) {
                 std::fputs("ok", fp);
                 std::fclose(fp);
                 std::remove(probe.c_str());
-                result = dir;  // return the wiliwili/ directory itself
+                result = path;
+                __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+                    "[runtime_log] USB writable dir selected: %s", path.c_str());
+                break;
+            } else {
+                __android_log_print(ANDROID_LOG_WARNING, "wiliwili",
+                    "[runtime_log] probe write FAILED on %s (errno=%d)", path.c_str(), errno);
             }
-            env->DeleteLocalRef(vol);
         }
-        if (volClass) env->DeleteLocalRef(volClass);
-        env->DeleteLocalRef(volumes);
+        env->DeleteLocalRef(dirs);
     } while (false);
 
     if (app) env->DeleteLocalRef(app);
@@ -386,12 +368,21 @@ static std::string formatRuntimeLine(std::chrono::system_clock::time_point tp,
 std::string wiliwili::initRuntimeLog() {
     if (g_runtimeLog) return g_runtimeLogPath;
 
+    __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+        "[runtime_log] initRuntimeLog START");
+
     // 1) Try USB (removable) storage first.
     std::string dir = findUsbStoragePath();
+    __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+        "[runtime_log] USB dir result: '%s'", dir.empty() ? "(empty)" : dir.c_str());
     if (!dir.empty()) {
         std::snprintf(g_runtimeLogPath, sizeof(g_runtimeLogPath),
                       "%s/wiliwili_runtime.log", dir.c_str());
         g_runtimeLog = std::fopen(g_runtimeLogPath, "w");
+        __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+            "[runtime_log] try USB path '%s' -> %s (errno=%d)",
+            g_runtimeLogPath, g_runtimeLog ? "OK" : "FAIL",
+            g_runtimeLog ? 0 : errno);
     }
 
     // 2) Fall back to external app-specific storage (always writable, no perms).
@@ -399,6 +390,9 @@ std::string wiliwili::initRuntimeLog() {
         // Reuse the JNI path resolution we already have for the startup log,
         // then swap the filename. The startup log path is cached in g_logPath.
         const char* startup = startupLogPath();
+        __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+            "[runtime_log] startupLogPath: '%s', g_logPath[0]=%d",
+            startup ? startup : "(null)", (int)g_logPath[0]);
         if (startup && g_logPath[0]) {
             // g_logPath = "<dir>/wiliwili_startup.log"
             char dirbuf[1024];
@@ -409,6 +403,10 @@ std::string wiliwili::initRuntimeLog() {
                 std::snprintf(g_runtimeLogPath, sizeof(g_runtimeLogPath),
                               "%s/wiliwili_runtime.log", dirbuf);
                 g_runtimeLog = std::fopen(g_runtimeLogPath, "w");
+                __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+                    "[runtime_log] try app-specific path '%s' -> %s (errno=%d)",
+                    g_runtimeLogPath, g_runtimeLog ? "OK" : "FAIL",
+                    g_runtimeLog ? 0 : errno);
             }
         }
     }
@@ -419,9 +417,15 @@ std::string wiliwili::initRuntimeLog() {
                       "/sdcard/wiliwili/wiliwili_runtime.log");
         ::mkdir("/sdcard/wiliwili", 0777);
         g_runtimeLog = std::fopen(g_runtimeLogPath, "w");
+        __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+            "[runtime_log] try /sdcard path '%s' -> %s (errno=%d)",
+            g_runtimeLogPath, g_runtimeLog ? "OK" : "FAIL",
+            g_runtimeLog ? 0 : errno);
     }
 
     if (!g_runtimeLog) {
+        __android_log_print(ANDROID_LOG_ERROR, "wiliwili",
+            "[runtime_log] ALL PATHS FAILED — runtime log disabled");
         g_runtimeLogPath[0] = '\0';
         return "";
     }
@@ -438,6 +442,9 @@ std::string wiliwili::initRuntimeLog() {
             std::string line = formatRuntimeLine(tp, level, msg);
             std::fwrite(line.data(), 1, line.size(), g_runtimeLog);
         });
+
+    __android_log_print(ANDROID_LOG_INFO, "wiliwili",
+        "[runtime_log] SUCCESS — log file: %s", g_runtimeLogPath);
 
     // First lines in the file — also visible via logcat through the Logger.
     brls::Logger::info("========================================");
