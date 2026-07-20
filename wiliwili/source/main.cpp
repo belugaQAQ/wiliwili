@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 #endif
 
     // Load cookies and settings
-    BOOT_LOG("[main] -> ProgramConfig::init()")
+    BOOT_LOG("[main] -> ProgramConfig::init()");
     ProgramConfig::instance().init();
     BOOT_LOG("[main] <- ProgramConfig::init() done");
 
