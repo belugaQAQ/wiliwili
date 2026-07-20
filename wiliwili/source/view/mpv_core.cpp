@@ -378,6 +378,18 @@ void MPVCore::init() {
     // Fix vo_wait_frame() cannot be wakeup
     mpvSetOptionString(mpv, "video-latency-hacks", "yes");
 #endif
+#if defined(__ANDROID__) && defined(MPV_USE_FB)
+    // Android TV GPUs (Mali / PowerVR / Adreno) use tiled rendering and have
+    // weak GL command synchronisation. mpvRenderContextRender submits FBO
+    // write commands in performSyncTasks() (after swap), but the next frame's
+    // draw() may read the FBO texture before the GPU has finished writing it,
+    // which displays partial / stale content and looks like flickering.
+    // Calling glFinish() after each mpv render (like Switch does) forces the
+    // GPU to complete the FBO write before the next frame starts.
+    // Emulators pass through to the host desktop GPU driver which handles this
+    // synchronisation correctly, so flicker is only visible on real TV hardware.
+    mpvSetOptionString(mpv, "opengl-glfinish", "yes");
+#endif
     // 过低的值可能导致部分直播流无法正确播放
     mpvSetOptionString(mpv, "demuxer-lavf-analyzeduration", "0.4");
     mpvSetOptionString(mpv, "demuxer-lavf-probescore", "24");
