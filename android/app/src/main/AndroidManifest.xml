@@ -9,6 +9,16 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- External storage: needed to write wiliwili_runtime.log directly to a
+         USB drive on Android TV. On Android 10 and below this grants full
+         access; on Android 11+ only app-specific dirs are writable without
+         MANAGE_EXTERNAL_STORAGE, which we don't request to avoid the
+         all-files-access permission UI on TV (awkward with a remote). -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+
     <!-- Touchscreen not required (Android TV) -->
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <!-- Game controller support -->

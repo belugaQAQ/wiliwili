@@ -1,16 +1,21 @@
 #include "utils/crash_helper.hpp"
 #include <borealis/core/logger.hpp>
+#include <borealis/core/event.hpp>
+#include <chrono>
+#include <ctime>
+#include <string>
 
 #if defined(__ANDROID__)
 
 #include <android/log.h>
+#include <dirent.h>
 #include <jni.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <sys/stat.h>
-#include <unistd.h>
 
 // SDL_AndroidGetExternalStoragePath — declared here to avoid pulling in
 // SDL_system.h (whose include path is set up by the borealis SDL2 target).
@@ -184,6 +189,265 @@ void wiliwili::initCrashDump() {
     wiliwili_register_crash_handler();
 }
 
+// =============================================================================
+// Runtime log: mirror every brls::Logger line to a file on USB (preferred) or
+// external app-specific storage. Used to diagnose TV-only flicker / stutter
+// without adb logcat.
+// =============================================================================
+
+// Persistent FILE* for the runtime log. Cached as a raw pointer so the
+// brls::Event subscription closure can capture it trivially.
+static std::FILE* g_runtimeLog = nullptr;
+static char g_runtimeLogPath[1024] = {0};
+
+// Resolve the Application context (or Activity) via JNI.
+// Returns a global ref the caller must DeleteGlobalRef, or nullptr.
+static jobject getAppContext(JNIEnv* env) {
+    if (!env) return nullptr;
+    // Try ActivityThread.currentApplicationThread().getApplication() first
+    // (works without SDL).
+    jclass atClass = env->FindClass("android/app/ActivityThread");
+    if (!atClass) return nullptr;
+    jmethodID getThread = env->GetStaticMethodID(atClass, "currentApplicationThread", "()Landroid/app/ApplicationThread;");
+    if (!getThread) { env->DeleteLocalRef(atClass); return nullptr; }
+    jobject thread = env->CallStaticObjectMethod(atClass, getThread);
+    env->DeleteLocalRef(atClass);
+    if (!thread || env->ExceptionCheck()) { env->ExceptionClear(); return nullptr; }
+    jmethodID getApp = env->GetMethodID(env->GetObjectClass(thread), "getApplication", "()Landroid/app/Application;");
+    jobject app = nullptr;
+    if (getApp) {
+        app = env->CallObjectMethod(thread, getApp);
+    }
+    env->DeleteLocalRef(thread);
+    if (!app || env->ExceptionCheck()) { env->ExceptionClear(); return nullptr; }
+    return app;
+}
+
+// Try to find a removable USB storage path via StorageManager.
+// Returns the absolute path (e.g. "/storage/AB12-CD34") or empty string.
+// Prefers a volume whose isRemovable()==true AND that we can actually write
+// a probe file to (because Android 11+ scoped storage may deny access even
+// when StorageManager reports the volume).
+static std::string findUsbStoragePath() {
+    if (!g_javaVM) return "";
+    JNIEnv* env = nullptr;
+    bool attached = false;
+    if (g_javaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) == JNI_EDETACHED) {
+        if (g_javaVM->AttachCurrentThread(&env, nullptr) != JNI_OK) return "";
+        attached = true;
+    } else if (!env) {
+        return "";
+    }
+
+    std::string result;
+    jobject app = getAppContext(env);
+
+    // Use a do-while(false) so we can `break` out without goto (C++ forbids
+    // goto jumping over variable initialisations).
+    do {
+        if (!app) break;
+
+        // StorageManager sm = (StorageManager) app.getSystemService(Context.STORAGE_SERVICE)
+        jclass ctxClass = env->GetObjectClass(app);
+        jmethodID getSystemService = env->GetMethodID(ctxClass, "getSystemService", "(Ljava/lang/Class;)Ljava/lang/Object;");
+        env->DeleteLocalRef(ctxClass);
+        if (!getSystemService) break;
+
+        jclass smClass = env->FindClass("android/storage/StorageManager");
+        if (!smClass) break;
+        jmethodID getVolumes = env->GetMethodID(smClass, "getStorageVolumes", "()Ljava/util/List;");
+        if (!getVolumes) { env->DeleteLocalRef(smClass); break; }
+
+        jobject sm = env->CallObjectMethod(app, getSystemService, smClass);
+        env->DeleteLocalRef(smClass);
+        if (!sm || env->ExceptionCheck()) { env->ExceptionClear(); break; }
+
+        jobject volumes = env->CallObjectMethod(sm, getVolumes);
+        env->DeleteLocalRef(sm);
+        if (!volumes || env->ExceptionCheck()) { env->ExceptionClear(); break; }
+
+        // Iterate list
+        jclass listClass = env->GetObjectClass(volumes);
+        jmethodID sizeM = env->GetMethodID(listClass, "size", "()I");
+        jmethodID getM  = env->GetMethodID(listClass, "get", "(I)Ljava/lang/Object;");
+        env->DeleteLocalRef(listClass);
+
+        jclass volClass = env->FindClass("android/storage/StorageVolume");
+        jmethodID isRemovable = nullptr;
+        jmethodID getDirectory = nullptr;
+        jmethodID getState = nullptr;
+        if (volClass) {
+            isRemovable = env->GetMethodID(volClass, "isRemovable", "()Z");
+            // getDirectory() added in API 30. For older API, fall back to
+            // toString() or getPath().
+            getDirectory = env->GetMethodID(volClass, "getDirectory", "()Ljava/io/File;");
+            if (!getDirectory || env->ExceptionCheck()) {
+                env->ExceptionClear();
+                getDirectory = nullptr;
+            }
+            getState = env->GetMethodID(volClass, "getState", "()Ljava/lang/String;");
+        }
+
+        jint n = sizeM ? env->CallIntMethod(volumes, sizeM) : 0;
+        for (jint i = 0; i < n && result.empty(); i++) {
+            jobject vol = env->CallObjectMethod(volumes, getM, i);
+            if (!vol || env->ExceptionCheck()) { env->ExceptionClear(); continue; }
+
+            bool removable = false;
+            if (isRemovable) {
+                removable = env->CallBooleanMethod(vol, isRemovable);
+                if (env->ExceptionCheck()) env->ExceptionClear();
+            }
+            if (!removable) { env->DeleteLocalRef(vol); continue; }
+
+            // Check state == "mounted"
+            std::string stateStr;
+            if (getState) {
+                jstring jstate = (jstring)env->CallObjectMethod(vol, getState);
+                if (jstate && !env->ExceptionCheck()) {
+                    const char* c = env->GetStringUTFChars(jstate, nullptr);
+                    if (c) { stateStr = c; env->ReleaseStringUTFChars(jstate, c); }
+                    env->DeleteLocalRef(jstate);
+                } else env->ExceptionClear();
+            }
+            if (!stateStr.empty() && stateStr != "mounted") {
+                env->DeleteLocalRef(vol);
+                continue;
+            }
+
+            // Get directory path
+            std::string path;
+            if (getDirectory) {
+                jobject f = env->CallObjectMethod(vol, getDirectory);
+                if (f && !env->ExceptionCheck()) {
+                    jmethodID getAbs = env->GetMethodID(env->GetObjectClass(f), "getAbsolutePath", "()Ljava/lang/String;");
+                    if (getAbs) {
+                        jstring jpath = (jstring)env->CallObjectMethod(f, getAbs);
+                        if (jpath && !env->ExceptionCheck()) {
+                            const char* c = env->GetStringUTFChars(jpath, nullptr);
+                            if (c) { path = c; env->ReleaseStringUTFChars(jpath, c); }
+                            env->DeleteLocalRef(jpath);
+                        }
+                    }
+                    env->DeleteLocalRef(f);
+                } else env->ExceptionClear();
+            }
+            if (path.empty()) { env->DeleteLocalRef(vol); continue; }
+
+            // Probe write: try to mkdir <path>/wiliwili and write a tiny file.
+            std::string dir = path + "/wiliwili";
+            ::mkdir(dir.c_str(), 0777);
+            std::string probe = dir + "/.probe";
+            if (FILE* fp = std::fopen(probe.c_str(), "w")) {
+                std::fputs("ok", fp);
+                std::fclose(fp);
+                std::remove(probe.c_str());
+                result = dir;  // return the wiliwili/ directory itself
+            }
+            env->DeleteLocalRef(vol);
+        }
+        if (volClass) env->DeleteLocalRef(volClass);
+        env->DeleteLocalRef(volumes);
+    } while (false);
+
+    if (app) env->DeleteLocalRef(app);
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    if (attached) g_javaVM->DetachCurrentThread();
+    return result;
+}
+
+// Build a timestamped log line, mirroring brls::Logger's format.
+static std::string formatRuntimeLine(std::chrono::system_clock::time_point tp,
+                                     brls::LogLevel level, const std::string& msg) {
+    auto secs = std::chrono::duration_cast<std::chrono::seconds>(
+        tp.time_since_epoch()).count() % 86400;
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        tp.time_since_epoch()).count() % 1000;
+    std::time_t tt = std::chrono::system_clock::to_time_t(tp);
+    std::tm tmv{};
+    localtime_r(&tt, &tmv);
+    int hh = tmv.tm_hour;
+    int mm = tmv.tm_min;
+    int ss = tmv.tm_sec;
+    const char* tag = "V";
+    switch (level) {
+        case brls::LogLevel::LOG_ERROR:   tag = "E"; break;
+        case brls::LogLevel::LOG_WARNING: tag = "W"; break;
+        case brls::LogLevel::LOG_INFO:    tag = "I"; break;
+        case brls::LogLevel::LOG_DEBUG:   tag = "D"; break;
+        case brls::LogLevel::LOG_VERBOSE: tag = "V"; break;
+    }
+    char header[64];
+    std::snprintf(header, sizeof(header), "%02d:%02d:%02d.%03d %s ",
+                  hh, mm, ss, (int)ms, tag);
+    return std::string(header) + msg + "\n";
+}
+
+std::string wiliwili::initRuntimeLog() {
+    if (g_runtimeLog) return g_runtimeLogPath;
+
+    // 1) Try USB (removable) storage first.
+    std::string dir = findUsbStoragePath();
+    if (!dir.empty()) {
+        std::snprintf(g_runtimeLogPath, sizeof(g_runtimeLogPath),
+                      "%s/wiliwili_runtime.log", dir.c_str());
+        g_runtimeLog = std::fopen(g_runtimeLogPath, "w");
+    }
+
+    // 2) Fall back to external app-specific storage (always writable, no perms).
+    if (!g_runtimeLog) {
+        // Reuse the JNI path resolution we already have for the startup log,
+        // then swap the filename. The startup log path is cached in g_logPath.
+        const char* startup = startupLogPath();
+        if (startup && g_logPath[0]) {
+            // g_logPath = "<dir>/wiliwili_startup.log"
+            char dirbuf[1024];
+            std::snprintf(dirbuf, sizeof(dirbuf), "%s", g_logPath);
+            char* slash = std::strrchr(dirbuf, '/');
+            if (slash) {
+                *slash = '\0';
+                std::snprintf(g_runtimeLogPath, sizeof(g_runtimeLogPath),
+                              "%s/wiliwili_runtime.log", dirbuf);
+                g_runtimeLog = std::fopen(g_runtimeLogPath, "w");
+            }
+        }
+    }
+
+    // 3) Last-ditch fallback: /sdcard/wiliwili/wiliwili_runtime.log
+    if (!g_runtimeLog) {
+        std::snprintf(g_runtimeLogPath, sizeof(g_runtimeLogPath),
+                      "/sdcard/wiliwili/wiliwili_runtime.log");
+        ::mkdir("/sdcard/wiliwili", 0777);
+        g_runtimeLog = std::fopen(g_runtimeLogPath, "w");
+    }
+
+    if (!g_runtimeLog) {
+        g_runtimeLogPath[0] = '\0';
+        return "";
+    }
+
+    // Line-buffer so the file is readable live via `cat` while the app runs.
+    std::setvbuf(g_runtimeLog, nullptr, _IOLBF, 0);
+
+    // Subscribe to brls::Logger so every log line gets mirrored to the file.
+    // The subscription is global (never released) — runs for app lifetime.
+    brls::Logger::getLogEvent()->subscribe(
+        [](std::chrono::system_clock::time_point tp, brls::LogLevel level,
+           const std::string& msg) {
+            if (!g_runtimeLog) return;
+            std::string line = formatRuntimeLine(tp, level, msg);
+            std::fwrite(line.data(), 1, line.size(), g_runtimeLog);
+        });
+
+    // First lines in the file — also visible via logcat through the Logger.
+    brls::Logger::info("========================================");
+    brls::Logger::info("wiliwili runtime log started");
+    brls::Logger::info("log file: {}", g_runtimeLogPath);
+    brls::Logger::info("========================================");
+
+    return g_runtimeLogPath;
+}
+
 #elif defined(_WIN32) && !defined(__WINRT__)
 
 #define WIN32_LEAN_AND_MEAN
@@ -299,8 +563,12 @@ LONG WINAPI createMiniDump(_EXCEPTION_POINTERS* pep) {
 
 void wiliwili::initCrashDump() { ::SetUnhandledExceptionFilter(createMiniDump); }
 
+std::string wiliwili::initRuntimeLog() { return ""; }
+
 #else
 
 void wiliwili::initCrashDump() {}
+
+std::string wiliwili::initRuntimeLog() { return ""; }
 
 #endif

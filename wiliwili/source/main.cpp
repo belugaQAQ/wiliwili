@@ -13,6 +13,7 @@
 
 #include "utils/config_helper.hpp"
 #include "utils/activity_helper.hpp"
+#include "utils/crash_helper.hpp"
 #include "view/mpv_core.hpp"
 
 #ifdef IOS
@@ -50,9 +51,28 @@ int main(int argc, char* argv[]) {
 #endif
 
     // Load cookies and settings
-    BOOT_LOG("[main] -> ProgramConfig::init()");
+    BOOT_LOG("[main] -> ProgramConfig::init()")
     ProgramConfig::instance().init();
     BOOT_LOG("[main] <- ProgramConfig::init() done");
+
+#ifdef __ANDROID__
+    // Start the runtime log file (USB if available, otherwise external app
+    // storage). Subscribes to brls::Logger so every subsequent log line is
+    // mirrored to the file for the entire app lifetime.
+    {
+        std::string logPath = wiliwili::initRuntimeLog();
+        if (!logPath.empty()) {
+            BOOT_LOG("[main] runtime log file opened");
+        } else {
+            BOOT_LOG("[main] FATAL: runtime log file could not be opened");
+        }
+        // Bump log level so the diagnostic logs (verbose) make it to the file.
+        // Lower threshold only if user didn't already request -d.
+        if (brls::Logger::getLogLevel() < brls::LogLevel::LOG_VERBOSE) {
+            brls::Logger::setLogLevel(brls::LogLevel::LOG_VERBOSE);
+        }
+    }
+#endif
 
     // Init the app and i18n
     BOOT_LOG("[main] -> brls::Application::init()");

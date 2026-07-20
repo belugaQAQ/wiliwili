@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <clocale>
 #include <cmath>
+#include <chrono>
 #include <pystring.h>
 #include <borealis/core/thread.hpp>
 #include <borealis/core/application.hpp>
@@ -207,6 +208,8 @@ static inline float aspectConverter(const std::string &value) {
 void MPVCore::on_update(void *self) {
     brls::sync([]() {
         uint64_t flags = mpvRenderContextUpdate(MPVCore::instance().getContext());
+        brls::Logger::verbose("[mpv] on_update fired: flags={:#x} frame_bit={}",
+            flags, (int)((flags & MPV_RENDER_UPDATE_FRAME) ? 1 : 0));
 #if defined(MPV_NO_FB) || defined(BOREALIS_USE_DEKO3D) || defined(BOREALIS_USE_D3D11)
         // 直接绘制到屏幕上，需要屏幕每刷新一次绘制一次，在 MPVCore 的绘制函数内部处理
         (void)flags;
@@ -219,12 +222,16 @@ void MPVCore::on_update(void *self) {
             mpvRenderContextRender(MPVCore::instance().mpv_context, MPVCore::instance().mpv_params);
             mpvRenderContextReportSwap(MPVCore::instance().mpv_context);
 #else
+            auto t0 = std::chrono::steady_clock::now();
             mpvRenderContextRender(MPVCore::instance().mpv_context, MPVCore::instance().mpv_params);
+            auto t1 = std::chrono::steady_clock::now();
+            auto us = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();
 #ifdef BOREALIS_USE_OPENGL
             glBindFramebuffer(GL_FRAMEBUFFER, MPVCore::instance().default_framebuffer);
             glViewport(0, 0, (GLsizei)brls::Application::windowWidth, (GLsizei)brls::Application::windowHeight);
 #endif
             mpvRenderContextReportSwap(MPVCore::instance().mpv_context);
+            brls::Logger::verbose("[mpv] render-to-fbo: {}us", us);
 #endif
         }
 #endif
@@ -379,16 +386,11 @@ void MPVCore::init() {
     mpvSetOptionString(mpv, "video-latency-hacks", "yes");
 #endif
 #if defined(__ANDROID__) && defined(MPV_USE_FB)
-    // Android TV GPUs (Mali / PowerVR / Adreno) use tiled rendering and have
-    // weak GL command synchronisation. mpvRenderContextRender submits FBO
-    // write commands in performSyncTasks() (after swap), but the next frame's
-    // draw() may read the FBO texture before the GPU has finished writing it,
-    // which displays partial / stale content and looks like flickering.
-    // Calling glFinish() after each mpv render (like Switch does) forces the
-    // GPU to complete the FBO write before the next frame starts.
-    // Emulators pass through to the host desktop GPU driver which handles this
-    // synchronisation correctly, so flicker is only visible on real TV hardware.
-    mpvSetOptionString(mpv, "opengl-glfinish", "yes");
+    // NOTE: opengl-glfinish=yes was previously enabled here to force GPU sync
+    // after each mpv render (matching the Switch workaround). On Android TV
+    // it caused heavy main-thread stalls (glFinish blocks on tiled-rendering
+    // GPUs) without eliminating the flicker. Disabled by default; enable
+    // manually with `mpv --opengl-glfinish=yes` if needed for diagnosis.
 #endif
     // 过低的值可能导致部分直播流无法正确播放
     mpvSetOptionString(mpv, "demuxer-lavf-analyzeduration", "0.4");
@@ -546,6 +548,36 @@ void MPVCore::init() {
 
     brls::Application::getExitEvent()->subscribe([]() { disableDimming(false); });
 
+    // Print the active render path so the runtime log shows exactly which
+    // branch of draw() / on_update is being exercised on this device.
+#if defined(MPV_SW_RENDER)
+    brls::Logger::info("[mpv] render path: MPV_SW_RENDER (CPU pixels)");
+#elif defined(BOREALIS_USE_DEKO3D)
+    brls::Logger::info("[mpv] render path: deko3d (Switch)");
+#elif defined(BOREALIS_USE_D3D11)
+    brls::Logger::info("[mpv] render path: D3D11");
+#elif defined(BOREALIS_USE_GXM)
+    brls::Logger::info("[mpv] render path: GXM (PSVita)");
+#elif defined(MPV_NO_FB)
+    brls::Logger::info("[mpv] render path: MPV_NO_FB (mpv draws directly to default framebuffer)");
+#elif defined(MPV_USE_FB)
+    #ifdef MPV_USE_VAO
+    brls::Logger::info("[mpv] render path: MPV_USE_FB + MPV_USE_VAO (FBO + VAO)");
+    #else
+    brls::Logger::info("[mpv] render path: MPV_USE_FB (FBO, no VAO)");
+    #endif
+#else
+    brls::Logger::info("[mpv] render path: default OpenGL");
+#endif
+    brls::Logger::info("[mpv] hwdec={} hardware_dec={} method={}",
+        HARDWARE_DEC ? "on" : "off",
+        HARDWARE_DEC ? "on" : "off",
+        PLAYER_HWDEC_METHOD);
+    brls::Logger::info("[mpv] window={}x{} content={}x{} scale={}",
+        brls::Application::windowWidth, brls::Application::windowHeight,
+        brls::Application::contentWidth, brls::Application::contentHeight,
+        brls::Application::windowScale);
+
     this->initializeVideo();
 }
 
@@ -644,6 +676,9 @@ void MPVCore::initializeVideo() {
         brls::Logger::error("glCheckFramebufferStatus failed");
         return;
     }
+    brls::Logger::info("[mpv] FBO created: fbo={} texture={} size={}x{}",
+        (int)media_framebuffer, (int)media_texture,
+        (int)brls::Application::windowWidth, (int)brls::Application::windowHeight);
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, default_framebuffer);
@@ -699,6 +734,9 @@ void MPVCore::initializeVideo() {
 void MPVCore::setFrameSize(brls::Rect r) {
     rect = r;
     if (std::isnan(rect.getWidth()) || std::isnan(rect.getHeight())) return;
+
+    brls::Logger::info("[mpv] setFrameSize rect=({},{},{},{})",
+        (int)r.getMinX(), (int)r.getMinY(), (int)r.getWidth(), (int)r.getHeight());
 
 #ifdef MPV_SW_RENDER
 #ifdef BOREALIS_USE_D3D11
@@ -798,6 +836,13 @@ bool MPVCore::isValid() { return mpv_context != nullptr; }
 void MPVCore::draw(brls::Rect area, float alpha) {
     if (mpv_context == nullptr) return;
     if (!(this->rect == area)) setFrameSize(area);
+
+    static thread_local int draw_count = 0;
+    draw_count++;
+    brls::Logger::verbose("[mpv] draw#{} alpha={} rect=({},{},{},{}) redraw={}",
+        draw_count, alpha,
+        (int)area.getMinX(), (int)area.getMinY(), (int)area.getWidth(), (int)area.getHeight(),
+        (int)(redraw ? 1 : 0));
 
 #ifdef MPV_SW_RENDER
     if (!pixels) return;
