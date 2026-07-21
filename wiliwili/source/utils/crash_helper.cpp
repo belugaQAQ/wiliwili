@@ -193,9 +193,10 @@ void wiliwili::initCrashDump() {
 // =============================================================================
 // Runtime log: mirror every brls::Logger line to a file in the same directory
 // as the startup log (app-specific external storage). No USB, no permissions.
+// Uses open→write→flush→close per line (like the startup log) to guarantee
+// the file is visible on disk even if the process is killed.
 // =============================================================================
 
-static std::FILE* g_runtimeLog = nullptr;
 static char g_runtimeLogPath[512] = {0};
 
 // Build a timestamped log line, mirroring brls::Logger's format.
@@ -221,7 +222,7 @@ static std::string formatRuntimeLine(std::chrono::system_clock::time_point tp,
 }
 
 std::string wiliwili::initRuntimeLog() {
-    if (g_runtimeLog) return g_runtimeLogPath;
+    if (g_runtimeLogPath[0]) return g_runtimeLogPath;
 
     // Reuse the same directory as wiliwili_startup.log. startupLogPath()
     // already resolves the app-specific external storage dir via JNI (or
@@ -246,25 +247,31 @@ std::string wiliwili::initRuntimeLog() {
     std::snprintf(g_runtimeLogPath, sizeof(g_runtimeLogPath),
                   "%s/wiliwili_runtime.log", dirbuf);
 
-    g_runtimeLog = std::fopen(g_runtimeLogPath, "w");
-    if (!g_runtimeLog) {
+    // Verify we can actually write to this path.
+    if (FILE* fp = std::fopen(g_runtimeLogPath, "w")) {
+        std::fputs("wiliwili runtime log starting...\n", fp);
+        std::fflush(fp);
+        std::fclose(fp);
+    } else {
         __android_log_print(ANDROID_LOG_ERROR, "wiliwili",
             "[runtime_log] fopen('%s', \"w\") FAILED errno=%d", g_runtimeLogPath, errno);
         g_runtimeLogPath[0] = '\0';
         return "";
     }
 
-    // Line-buffer so the file is readable live via `cat` while the app runs.
-    std::setvbuf(g_runtimeLog, nullptr, _IOLBF, 0);
-
     // Subscribe to brls::Logger so every log line gets mirrored to the file.
-    // The subscription is global (never released) — runs for app lifetime.
+    // Open/write/flush/close per line — same pattern as the startup log.
+    // Guarantees the file is on disk even if the process is killed.
     brls::Logger::getLogEvent()->subscribe(
         [](std::chrono::system_clock::time_point tp, brls::LogLevel level,
            const std::string& msg) {
-            if (!g_runtimeLog) return;
-            std::string line = formatRuntimeLine(tp, level, msg);
-            std::fwrite(line.data(), 1, line.size(), g_runtimeLog);
+            if (!g_runtimeLogPath[0]) return;
+            if (FILE* fp = std::fopen(g_runtimeLogPath, "a")) {
+                std::string line = formatRuntimeLine(tp, level, msg);
+                std::fwrite(line.data(), 1, line.size(), fp);
+                std::fflush(fp);
+                std::fclose(fp);
+            }
         });
 
     __android_log_print(ANDROID_LOG_INFO, "wiliwili",
