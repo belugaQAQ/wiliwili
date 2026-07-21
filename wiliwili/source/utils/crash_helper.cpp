@@ -325,7 +325,7 @@ static std::string findUsbStoragePath() {
                     "[runtime_log] USB writable dir selected: %s", path.c_str());
                 break;
             } else {
-                __android_log_print(ANDROID_LOG_WARNING, "wiliwili",
+                __android_log_print(ANDROID_LOG_WARN, "wiliwili",
                     "[runtime_log] probe write FAILED on %s (errno=%d)", path.c_str(), errno);
             }
         }
