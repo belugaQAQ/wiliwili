@@ -66,7 +66,7 @@ static const char* resolveLogPathViaJni() {
                 if (getApp) {
                     jobject app = env->CallObjectMethod(thread, getApp);
                     if (app && !env->ExceptionCheck()) {
-                        jmethodID getDir = env->GetMethodID(env->GetObjectClass(app), "getExternalFilesDir", "(Ljava/io/File;)Ljava/io/File;");
+                        jmethodID getDir = env->GetMethodID(env->GetObjectClass(app), "getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;");
                         if (getDir) {
                             jobject dir = env->CallObjectMethod(app, getDir, nullptr);
                             if (dir && !env->ExceptionCheck()) {
